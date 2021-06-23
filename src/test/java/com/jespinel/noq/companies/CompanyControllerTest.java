@@ -1,6 +1,7 @@
 package com.jespinel.noq.companies;
 
 import com.jespinel.noq.AbstractContainerBaseTest;
+import com.jespinel.noq.TestFactories;
 import com.jespinel.noq.common.exceptions.ApiError;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -64,7 +65,7 @@ class CompanyControllerTest extends AbstractContainerBaseTest {
 
     @Test
     void shouldReturn201_WhenRequestIsValid() throws Exception {
-        Company company = CompanyTestFactory.getRandomCompany();
+        Company company = TestFactories.getRandomCompany();
         CreateCompanyRequest newCompany = new CreateCompanyRequest(company.getNit(), company.getName());
 
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(CREATE_COMPANY_URL)
@@ -87,7 +88,7 @@ class CompanyControllerTest extends AbstractContainerBaseTest {
     // private methods
 
     private Company createRandomCompanyInDB() {
-        Company company = CompanyTestFactory.getRandomCompany();
+        Company company = TestFactories.getRandomCompany();
         return repository.save(company);
     }
 }
