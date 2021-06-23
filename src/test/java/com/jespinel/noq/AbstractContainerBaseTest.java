@@ -12,39 +12,42 @@ import org.testcontainers.containers.PostgreSQLContainer;
 
 import javax.xml.bind.DatatypeConverter;
 
+
 @SpringBootTest
 @AutoConfigureMockMvc
 public abstract class AbstractContainerBaseTest {
 
-    protected static final String TEST_USER_USERNAME = "qwe";
-    protected static final String TEST_USER_PASSWORD = "asd";
+    private static final String TEST_USER_USERNAME = "qwe";
+    private static final String TEST_USER_PASSWORD = "asd";
 
-    protected static final String TEST_POSTGRES_DB_NAME = "noqdb_test";
-    protected static final String TEST_POSTGRES_USERNAME = "postgres";
-    protected static final String TEST_POSTGRES_PASSWORD = "example";
-
-    @Autowired
-    protected ObjectMapper objectMapper;
+    private static final String TEST_POSTGRES_DB_NAME = "noqdb_test";
+    private static final String TEST_POSTGRES_USERNAME = "postgres";
+    private static final String TEST_POSTGRES_PASSWORD = "example";
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
+    protected ObjectMapper objectMapper;
+
+    @Autowired
     protected MockMvc mockMvc;
 
-    // Start a single DB container per all test cases
-    static final PostgreSQLContainer<?> postgres;
+    private static final PostgreSQLContainer<?> postgres;
 
+    // Start a single container per all test cases that extend this class.
     static {
         postgres = new PostgreSQLContainer<>("postgres:13-alpine")
                 .withDatabaseName(TEST_POSTGRES_DB_NAME)
                 .withUsername(TEST_POSTGRES_USERNAME)
-                .withPassword(TEST_POSTGRES_PASSWORD);
+                .withPassword(TEST_POSTGRES_PASSWORD)
+                .withReuse(true);
         postgres.start();
     }
 
     protected void cleanDatabase() {
-        JdbcTestUtils.deleteFromTables(jdbcTemplate, "companies");
+        String[] tables = {"companies", "branches"};
+        JdbcTestUtils.deleteFromTables(jdbcTemplate, tables);
     }
 
     protected void addAuthorizationHeader(MockHttpServletRequestBuilder request) {
