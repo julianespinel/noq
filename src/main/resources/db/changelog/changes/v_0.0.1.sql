@@ -8,3 +8,16 @@ CREATE TABLE companies
     updated_at TIMESTAMP    NOT NULL
 );
 --rollback drop table companies;
+
+--changeset julianespinel:2
+CREATE TABLE branches
+(
+    id         SERIAL PRIMARY KEY,
+    name       VARCHAR(256) NOT NULL,
+    parentId   INTEGER REFERENCES companies (id),
+    created_at TIMESTAMP    NOT NULL,
+    updated_at TIMESTAMP    NOT NULL,
+
+    UNIQUE (name, parentId)
+);
+--rollback drop table branches;
