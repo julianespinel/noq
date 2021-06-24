@@ -24,4 +24,8 @@ public class TestFactories {
         Branch branch = getRandomBranch(parentId);
         return new CreateBranchRequest(branch.getName(), branch.getParentId());
     }
+
+    public static CreateBranchRequest getCreateBranchRequest(Branch branch) {
+        return CreateBranchRequest.from(branch);
+    }
 }
