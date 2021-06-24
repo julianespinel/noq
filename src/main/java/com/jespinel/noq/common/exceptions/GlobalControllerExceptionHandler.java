@@ -26,4 +26,11 @@ public class GlobalControllerExceptionHandler extends ResponseEntityExceptionHan
         ApiError apiError = new ApiError(exception.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(apiError);
     }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ApiError> handleValidationErrors(EntityNotFoundException exception) {
+        logger.error(exception.getMessage(), exception);
+        ApiError apiError = new ApiError(exception.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiError);
+    }
 }
