@@ -6,7 +6,7 @@
 
 ## Branch
 
-1. Add branch to company, ex: Bank A at 33th street
+1. Add branch to company, ex: Bank A at 33rd street
 1. Add queue to branch, ex: Bank A at 33th street, payments queue
 
 ## Turn

@@ -1,10 +1,9 @@
 package com.jespinel.noq.companies;
 
 import com.jespinel.noq.common.exceptions.ValidationException;
-import com.jespinel.noq.companies.Company;
 import org.apache.logging.log4j.util.Strings;
 
-record CreateCompanyRequest(String nit, String name) {
+public record CreateCompanyRequest(String nit, String name) {
 
     void validateOrThrow() throws ValidationException {
         if (Strings.isBlank(nit)) {

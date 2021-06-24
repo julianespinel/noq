@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 import java.time.LocalDateTime;
 
-class Company {
+public class Company {
 
     private long id;
     private final String nit;
@@ -12,7 +12,7 @@ class Company {
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
 
-    Company(String nit, String name) {
+    public Company(String nit, String name) {
         this.nit = nit;
         this.name = name;
 
@@ -21,7 +21,7 @@ class Company {
         updatedAt = now;
     }
 
-    Company(long id, Company company) {
+    public Company(long id, Company company) {
         this.id = id;
         nit = company.nit;
         name = company.name;
