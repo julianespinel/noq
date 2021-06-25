@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class BranchControllerTest extends AbstractContainerBaseTest {
 
-    private static final String CREATE_BRANCH_URL = "/api/branches";
+    private static final String BRANCHES_URL = "/api/branches";
 
     @Autowired
     private BranchRepository repository;
@@ -39,7 +39,7 @@ class BranchControllerTest extends AbstractContainerBaseTest {
         // given
         CreateBranchRequest notValidParentId = TestFactories.getCreateBranchRequest(-1);
 
-        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(CREATE_BRANCH_URL)
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(BRANCHES_URL)
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(notValidParentId));
@@ -61,7 +61,7 @@ class BranchControllerTest extends AbstractContainerBaseTest {
 
         CreateBranchRequest duplicatedBranchRequest = TestFactories.getCreateBranchRequest(branch);
 
-        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(CREATE_BRANCH_URL)
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(BRANCHES_URL)
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(duplicatedBranchRequest));
@@ -79,7 +79,7 @@ class BranchControllerTest extends AbstractContainerBaseTest {
         long nonExistentCompanyId = 123;
         CreateBranchRequest nonExistentCompanyRequest = TestFactories.getCreateBranchRequest(nonExistentCompanyId);
 
-        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(CREATE_BRANCH_URL)
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(BRANCHES_URL)
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(nonExistentCompanyRequest));
@@ -99,7 +99,7 @@ class BranchControllerTest extends AbstractContainerBaseTest {
         CreateBranchRequest createBranchRequest = TestFactories.getCreateBranchRequest(createdCompany.getId());
         LocalDateTime currentDate = LocalDateTime.now();
 
-        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(CREATE_BRANCH_URL)
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(BRANCHES_URL)
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(createBranchRequest));
