@@ -1,9 +1,5 @@
 package com.jespinel.noq.queues;
 
-import com.jespinel.noq.companies.Company;
-import com.jespinel.noq.companies.CompanyController;
-import com.jespinel.noq.companies.CompanyService;
-import com.jespinel.noq.companies.CreateCompanyRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

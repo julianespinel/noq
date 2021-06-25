@@ -1,6 +1,5 @@
 package com.jespinel.noq.branches;
 
-import com.jespinel.noq.queues.Queue;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
