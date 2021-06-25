@@ -14,10 +14,23 @@ CREATE TABLE branches
 (
     id         SERIAL PRIMARY KEY,
     name       VARCHAR(256) NOT NULL,
-    parentId   INTEGER REFERENCES companies (id),
+    companyId  INTEGER REFERENCES companies (id),
     created_at TIMESTAMP    NOT NULL,
     updated_at TIMESTAMP    NOT NULL,
 
-    UNIQUE (name, parentId)
+    UNIQUE (name, companyId)
 );
 --rollback drop table branches;
+
+--changeset julianespinel:3
+CREATE TABLE queues
+(
+    id         SERIAL PRIMARY KEY,
+    name       VARCHAR(256) NOT NULL,
+    branchId   INTEGER REFERENCES branches (id),
+    created_at TIMESTAMP    NOT NULL,
+    updated_at TIMESTAMP    NOT NULL,
+
+    UNIQUE (name, branchId)
+);
+--rollback drop table queues;

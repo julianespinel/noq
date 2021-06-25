@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/branches")
 class BranchController {
 
-    Logger logger = LoggerFactory.getLogger(BranchController.class);
+    final Logger logger = LoggerFactory.getLogger(BranchController.class);
 
     private final BranchService branchService;
 

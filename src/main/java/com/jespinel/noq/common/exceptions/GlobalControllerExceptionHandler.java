@@ -11,7 +11,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @ControllerAdvice
 public class GlobalControllerExceptionHandler extends ResponseEntityExceptionHandler {
 
-    Logger logger = LoggerFactory.getLogger(GlobalControllerExceptionHandler.class);
+    final Logger logger = LoggerFactory.getLogger(GlobalControllerExceptionHandler.class);
 
     @ExceptionHandler(ValidationException.class)
     public ResponseEntity<ApiError> handleValidationErrors(ValidationException exception) {

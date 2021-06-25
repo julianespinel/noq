@@ -1,38 +1,38 @@
-package com.jespinel.noq.branches;
+package com.jespinel.noq.queues;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 import java.time.LocalDateTime;
 
-public class Branch {
+public class Queue {
 
     private long id;
     private final String name;
-    private final long companyId;
+    private final long branchId;
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
 
-    public Branch(long id, Branch branch) {
+    public Queue(long id, Queue queue) {
         this.id = id;
-        name = branch.name;
-        companyId = branch.companyId;
-        createdAt = branch.createdAt;
-        updatedAt = branch.updatedAt;
+        name = queue.name;
+        branchId = queue.branchId;
+        createdAt = queue.createdAt;
+        updatedAt = queue.updatedAt;
     }
 
-    public Branch(String name, long companyId) {
+    public Queue(String name, long branchId) {
         this.name = name;
-        this.companyId = companyId;
+        this.branchId = branchId;
         LocalDateTime now = LocalDateTime.now();
         this.createdAt = now;
         this.updatedAt = now;
     }
 
     @JsonCreator
-    public Branch(long id, String name, long companyId, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public Queue(long id, String name, long branchId, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.name = name;
-        this.companyId = companyId;
+        this.branchId = branchId;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -45,8 +45,8 @@ public class Branch {
         return name;
     }
 
-    public long getCompanyId() {
-        return companyId;
+    public long getBranchId() {
+        return branchId;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -56,4 +56,5 @@ public class Branch {
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
     }
+
 }

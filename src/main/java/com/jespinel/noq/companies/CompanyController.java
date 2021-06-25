@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/companies")
 public class CompanyController {
 
-    Logger logger = LoggerFactory.getLogger(CompanyController.class);
+    final Logger logger = LoggerFactory.getLogger(CompanyController.class);
 
     private final CompanyService service;
 

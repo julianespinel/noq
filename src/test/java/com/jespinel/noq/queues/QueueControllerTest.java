@@ -1,7 +1,9 @@
-package com.jespinel.noq.branches;
+package com.jespinel.noq.queues;
 
 import com.jespinel.noq.AbstractContainerBaseTest;
 import com.jespinel.noq.TestFactories;
+import com.jespinel.noq.branches.Branch;
+import com.jespinel.noq.branches.BranchService;
 import com.jespinel.noq.common.exceptions.ApiError;
 import com.jespinel.noq.companies.Company;
 import com.jespinel.noq.companies.CompanyService;
@@ -18,13 +20,15 @@ import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+class QueueControllerTest extends AbstractContainerBaseTest {
 
-class BranchControllerTest extends AbstractContainerBaseTest {
-
-    private static final String BRANCHES_URL = "/api/branches";
+    private static final String QUEUES_URL = "/api/queues";
 
     @Autowired
-    private BranchRepository repository;
+    private QueueRepository repository;
+
+    @Autowired
+    private BranchService branchService;
 
     @Autowired
     private CompanyService companyService;
@@ -37,58 +41,61 @@ class BranchControllerTest extends AbstractContainerBaseTest {
     @Test
     void shouldReturn400_WhenRequestIsNotValid() throws Exception {
         // given
-        CreateBranchRequest notValidParentId = TestFactories.getCreateBranchRequest(-1);
+        CreateQueueRequest notValidBranchId = TestFactories.getCreateQueueRequest(-1);
 
-        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(BRANCHES_URL)
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(QUEUES_URL)
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(notValidParentId));
+                .content(objectMapper.writeValueAsString(notValidBranchId));
         // when
         MockHttpServletResponse response = mockMvc.perform(request).andReturn().getResponse();
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
         ApiError apiError = objectMapper.readValue(response.getContentAsString(), ApiError.class);
-        assertThat(apiError.error()).isEqualTo("The given company id is not valid");
+        assertThat(apiError.error()).isEqualTo("The given branch id is not valid");
     }
 
     @Test
-    void shouldReturn409_WhenBranchAlreadyExists() throws Exception {
+    void shouldReturn409_WhenQueueAlreadyExists() throws Exception {
         Company company = TestFactories.getRandomCompany();
         Company createdCompany = companyService.create(company);
 
         Branch branch = TestFactories.getRandomBranch(createdCompany.getId());
-        repository.save(branch);
+        Branch createdBranch = branchService.create(branch);
 
-        CreateBranchRequest duplicatedBranchRequest = TestFactories.getCreateBranchRequest(branch);
+        Queue queue = TestFactories.getRandomQueue(createdBranch.getId());
+        repository.save(queue);
 
-        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(BRANCHES_URL)
+        CreateQueueRequest duplicatedQueueRequest = TestFactories.getCreateQueueRequest(queue);
+
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(QUEUES_URL)
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(duplicatedBranchRequest));
+                .content(objectMapper.writeValueAsString(duplicatedQueueRequest));
         // when
         MockHttpServletResponse response = mockMvc.perform(request).andReturn().getResponse();
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.CONFLICT.value());
         ApiError apiError = objectMapper.readValue(response.getContentAsString(), ApiError.class);
-        String errorMessage = "A branch with name %s from company %s already exists".formatted(branch.getName(), createdCompany.getId());
+        String errorMessage = "A queue with name %s from branch %s already exists".formatted(queue.getName(), createdBranch.getId());
         assertThat(apiError.error()).isEqualTo(errorMessage);
     }
 
     @Test
-    void shouldReturn404_WhenParentCompanyDoesNotExist() throws Exception {
-        long nonExistentCompanyId = 123;
-        CreateBranchRequest nonExistentCompanyRequest = TestFactories.getCreateBranchRequest(nonExistentCompanyId);
+    void shouldReturn404_WhenParentBranchDoesNotExist() throws Exception {
+        long nonExistentBranchId = 123;
+        CreateQueueRequest nonExistentBranchRequest = TestFactories.getCreateQueueRequest(nonExistentBranchId);
 
-        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(BRANCHES_URL)
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(QUEUES_URL)
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(nonExistentCompanyRequest));
+                .content(objectMapper.writeValueAsString(nonExistentBranchRequest));
         // when
         MockHttpServletResponse response = mockMvc.perform(request).andReturn().getResponse();
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
         ApiError apiError = objectMapper.readValue(response.getContentAsString(), ApiError.class);
-        String errorMessage = "The company with ID %s was not found".formatted(nonExistentCompanyId);
+        String errorMessage = "The branch with ID %s was not found".formatted(nonExistentBranchId);
         assertThat(apiError.error()).isEqualTo(errorMessage);
     }
 
@@ -96,23 +103,27 @@ class BranchControllerTest extends AbstractContainerBaseTest {
     void shouldReturn201_WhenGivenAValidRequest() throws Exception {
         Company company = TestFactories.getRandomCompany();
         Company createdCompany = companyService.create(company);
-        CreateBranchRequest createBranchRequest = TestFactories.getCreateBranchRequest(createdCompany.getId());
+
+        Branch branch = TestFactories.getRandomBranch(createdCompany.getId());
+        Branch createdBranch = branchService.create(branch);
+
+        CreateQueueRequest createQueueRequest = TestFactories.getCreateQueueRequest(createdBranch.getId());
         LocalDateTime currentDate = LocalDateTime.now();
 
-        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(BRANCHES_URL)
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(QUEUES_URL)
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(createBranchRequest));
+                .content(objectMapper.writeValueAsString(createQueueRequest));
         // when
         MockHttpServletResponse response = mockMvc.perform(request).andReturn().getResponse();
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.CREATED.value());
 
-        Branch branch = objectMapper.readValue(response.getContentAsString(), Branch.class);
-        assertThat(branch.getId()).isGreaterThan(0);
-        assertThat(branch.getName()).isEqualTo(createBranchRequest.name());
-        assertThat(branch.getCompanyId()).isEqualTo(createBranchRequest.companyId());
-        assertThat(branch.getCreatedAt()).isAfterOrEqualTo(currentDate);
-        assertThat(branch.getUpdatedAt()).isAfterOrEqualTo(currentDate);
+        Queue queue = objectMapper.readValue(response.getContentAsString(), Queue.class);
+        assertThat(queue.getId()).isGreaterThan(0);
+        assertThat(queue.getName()).isEqualTo(createQueueRequest.name());
+        assertThat(queue.getBranchId()).isEqualTo(createQueueRequest.branchId());
+        assertThat(queue.getCreatedAt()).isAfterOrEqualTo(currentDate);
+        assertThat(queue.getUpdatedAt()).isAfterOrEqualTo(currentDate);
     }
 }

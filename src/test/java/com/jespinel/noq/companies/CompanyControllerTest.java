@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class CompanyControllerTest extends AbstractContainerBaseTest {
 
-    private static final String CREATE_COMPANY_URL = "/api/companies";
+    private static final String COMPANIES_URL = "/api/companies";
 
     @Autowired
     private CompanyRepository repository;
@@ -32,7 +32,7 @@ class CompanyControllerTest extends AbstractContainerBaseTest {
         // given
         CreateCompanyRequest emptyNitCompany = new CreateCompanyRequest("", "name");
 
-        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(CREATE_COMPANY_URL)
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(COMPANIES_URL)
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(emptyNitCompany));
@@ -50,7 +50,7 @@ class CompanyControllerTest extends AbstractContainerBaseTest {
         Company company = createRandomCompanyInDB();
         CreateCompanyRequest duplicatedCompany = new CreateCompanyRequest(company.getNit(), company.getName());
 
-        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(CREATE_COMPANY_URL)
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(COMPANIES_URL)
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(duplicatedCompany));
@@ -68,7 +68,7 @@ class CompanyControllerTest extends AbstractContainerBaseTest {
         Company company = TestFactories.getRandomCompany();
         CreateCompanyRequest newCompany = new CreateCompanyRequest(company.getNit(), company.getName());
 
-        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(CREATE_COMPANY_URL)
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(COMPANIES_URL)
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(newCompany));
