@@ -8,31 +8,31 @@ public class Branch {
 
     private long id;
     private final String name;
-    private final long parentId;
+    private final long companyId;
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
 
     public Branch(long id, Branch branch) {
         this.id = id;
         name = branch.name;
-        parentId = branch.parentId;
+        companyId = branch.companyId;
         createdAt = branch.createdAt;
         updatedAt = branch.updatedAt;
     }
 
-    public Branch(String name, long parentId) {
+    public Branch(String name, long companyId) {
         this.name = name;
-        this.parentId = parentId;
+        this.companyId = companyId;
         LocalDateTime now = LocalDateTime.now();
         this.createdAt = now;
         this.updatedAt = now;
     }
 
     @JsonCreator
-    public Branch(long id, String name, long parentId, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public Branch(long id, String name, long companyId, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.name = name;
-        this.parentId = parentId;
+        this.companyId = companyId;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -45,8 +45,8 @@ public class Branch {
         return name;
     }
 
-    public long getParentId() {
-        return parentId;
+    public long getCompanyId() {
+        return companyId;
     }
 
     public LocalDateTime getCreatedAt() {

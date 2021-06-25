@@ -70,7 +70,7 @@ class BranchControllerTest extends AbstractContainerBaseTest {
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.CONFLICT.value());
         ApiError apiError = objectMapper.readValue(response.getContentAsString(), ApiError.class);
-        String errorMessage = "A branch with name %s and parent %s already exists".formatted(branch.getName(), createdCompany.getId());
+        String errorMessage = "A branch with name %s from company %s already exists".formatted(branch.getName(), createdCompany.getId());
         assertThat(apiError.error()).isEqualTo(errorMessage);
     }
 
@@ -111,7 +111,7 @@ class BranchControllerTest extends AbstractContainerBaseTest {
         Branch branch = objectMapper.readValue(response.getContentAsString(), Branch.class);
         assertThat(branch.getId()).isGreaterThan(0);
         assertThat(branch.getName()).isEqualTo(createBranchRequest.name());
-        assertThat(branch.getParentId()).isEqualTo(createBranchRequest.companyId());
+        assertThat(branch.getCompanyId()).isEqualTo(createBranchRequest.companyId());
         assertThat(branch.getCreatedAt()).isAfterOrEqualTo(currentDate);
         assertThat(branch.getUpdatedAt()).isAfterOrEqualTo(currentDate);
     }

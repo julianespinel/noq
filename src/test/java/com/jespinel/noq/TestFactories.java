@@ -22,7 +22,7 @@ public class TestFactories {
 
     public static CreateBranchRequest getCreateBranchRequest(long parentId) {
         Branch branch = getRandomBranch(parentId);
-        return new CreateBranchRequest(branch.getName(), branch.getParentId());
+        return new CreateBranchRequest(branch.getName(), branch.getCompanyId());
     }
 
     public static CreateBranchRequest getCreateBranchRequest(Branch branch) {

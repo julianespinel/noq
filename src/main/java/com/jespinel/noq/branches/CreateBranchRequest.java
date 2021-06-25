@@ -19,6 +19,6 @@ public record CreateBranchRequest(String name, long companyId) {
     }
 
     public static CreateBranchRequest from(Branch branch) {
-        return new CreateBranchRequest(branch.getName(), branch.getParentId());
+        return new CreateBranchRequest(branch.getName(), branch.getCompanyId());
     }
 }
