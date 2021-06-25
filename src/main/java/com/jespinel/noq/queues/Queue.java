@@ -1,7 +1,6 @@
 package com.jespinel.noq.queues;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.jespinel.noq.branches.Branch;
 
 import java.time.LocalDateTime;
 
