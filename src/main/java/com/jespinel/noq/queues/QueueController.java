@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/queues")
 public class QueueController {
 
-    Logger logger = LoggerFactory.getLogger(QueueController.class);
+    final Logger logger = LoggerFactory.getLogger(QueueController.class);
 
     private final QueueService service;
 
