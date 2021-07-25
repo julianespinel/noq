@@ -54,6 +54,12 @@
             <version>4.3.5</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.twilio.sdk</groupId>
+            <artifactId>twilio</artifactId>
+            <version>8.17.0</version>
+        </dependency>
+
         <!-- testing dependencies -->
         <dependency>
             <groupId>org.testcontainers</groupId>
