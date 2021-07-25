@@ -18,8 +18,8 @@ import java.util.Optional;
 class BranchRepository {
 
     private static final String CREATE_BRANCH_SQL =
-            "INSERT INTO branches (name, companyId, created_at, updated_at) " +
-                    "VALUES (:name, :companyId, :created_at, :updated_at)";
+            "INSERT INTO branches (name, company_id, created_at, updated_at) " +
+                    "VALUES (:name, :companyId, :createdAt, :updatedAt)";
 
     private static final String FIND_BRANCH_SQL =
             "SELECT * FROM branches WHERE id = :id";
@@ -37,8 +37,8 @@ class BranchRepository {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("name", branch.getName())
                 .addValue("companyId", branch.getCompanyId())
-                .addValue("created_at", branch.getCreatedAt())
-                .addValue("updated_at", branch.getUpdatedAt());
+                .addValue("createdAt", branch.getCreatedAt())
+                .addValue("updatedAt", branch.getUpdatedAt());
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(CREATE_BRANCH_SQL, params, keyHolder, ID);
 
