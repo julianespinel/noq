@@ -57,4 +57,11 @@ public class QueueRepository {
             throw new DuplicatedEntityException(errorMessage);
         }
     }
+
+    public Optional<Queue> find(long queueId) {
+        SqlParameterSource params = new MapSqlParameterSource().addValue("id", queueId);
+        List<Queue> queues = jdbcTemplate.query(FIND_QUEUE_SQL, params, new QueueRowMapper());
+        Queue queue = DataAccessUtils.singleResult(queues);
+        return Optional.ofNullable(queue);
+    }
 }
