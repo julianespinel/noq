@@ -36,6 +36,11 @@
             <artifactId>spring-boot-starter-jdbc</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+
         <!-- extras -->
         <dependency>
             <groupId>org.postgresql</groupId>
