@@ -12,7 +12,7 @@ public class BranchRowMapper implements RowMapper<Branch> {
     public Branch mapRow(ResultSet rs, int rowNum) throws SQLException {
         long id = rs.getLong("id");
         String name = rs.getString("name");
-        long companyId = rs.getLong("companyId");
+        long companyId = rs.getLong("company_id");
         LocalDateTime createdAt = rs.getTimestamp("created_at").toLocalDateTime();
         LocalDateTime updatedAt = rs.getTimestamp("updated_at").toLocalDateTime();
         return new Branch(id, name, companyId, createdAt, updatedAt);

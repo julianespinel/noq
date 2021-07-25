@@ -1,2 +1,2 @@
-# noq
-Let your phone make the line (queue) for you
+# Noq
+Let your phone make the line (queue) for you.
