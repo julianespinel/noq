@@ -39,6 +39,8 @@ class TurnControllerTest extends AbstractContainerBaseTest {
     @Autowired
     private QueueService queueService;
 
+    @Autowired TurnService turnService;
+
     @AfterEach
     void tearDown() {
         cleanCache();
@@ -214,6 +216,65 @@ class TurnControllerTest extends AbstractContainerBaseTest {
         assertThat(turn.getPhoneNumber()).isEqualTo(phoneNumber);
         assertThat(turn.getTurnNumber().toString()).isEqualTo("A101");
         assertThat(turn.getQueueId()).isEqualTo(queueId);
+    }
+
+    @Test
+    void cancelTurn_shouldReturn400_WhenPhoneNumberIsNotValid() throws Exception {
+        // given
+        String phoneNumberWithErrors = "123";
+        CancelTurnRequest notValidPhoneNumber = new CancelTurnRequest(phoneNumberWithErrors);
+
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.delete(TURNS_URL)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(notValidPhoneNumber));
+        // when
+        MockHttpServletResponse response = mockMvc.perform(request).andReturn().getResponse();
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        ApiError apiError = objectMapper.readValue(response.getContentAsString(), ApiError.class);
+        assertThat(apiError.error()).isEqualTo("The given phone number is not valid");
+    }
+
+    @Test
+    void cancelTurn_shouldReturn200AndNoBody_WhenThePhoneNumberDoesNotHaveAnAssociatedTurn() throws Exception {
+        // given
+        String validPhoneNumber = "+573002930008";
+        CancelTurnRequest cancelTurnRequest = new CancelTurnRequest(validPhoneNumber);
+
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.delete(TURNS_URL)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(cancelTurnRequest));
+        // when
+        MockHttpServletResponse response = mockMvc.perform(request).andReturn().getResponse();
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEmpty();
+    }
+
+    @Test
+    void cancelTurn_shouldReturn200WithBody_WhenThePhoneNumberHasAnAssociatedTurn() throws Exception {
+        // given
+        Queue queue = createQueue();
+        String validPhoneNumber = "+573002930008";
+        Turn existentTurn = turnService.create(validPhoneNumber, queue.getId());
+
+        CancelTurnRequest cancelTurnRequest = new CancelTurnRequest(validPhoneNumber);
+
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.delete(TURNS_URL)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(cancelTurnRequest));
+        // when
+        MockHttpServletResponse response = mockMvc.perform(request).andReturn().getResponse();
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        Turn turn = objectMapper.readValue(response.getContentAsString(), Turn.class);
+        assertThat(turn.getId()).isEqualTo(existentTurn.getId());
+        assertThat(turn.getPhoneNumber()).isEqualTo(validPhoneNumber);
+        assertThat(turn.getTurnNumber().toString()).isEqualTo(existentTurn.getTurnNumber().toString());
+        assertThat(turn.getQueueId()).isEqualTo(queue.getId());
     }
 
     private Queue createQueue() {
