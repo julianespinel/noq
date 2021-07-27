@@ -46,7 +46,7 @@ class TurnControllerTest extends AbstractContainerBaseTest {
     }
 
     @Test
-    void shouldReturn400_WhenPhoneNumberIsNotValid() throws Exception {
+    void createTurn_shouldReturn400_WhenPhoneNumberIsNotValid() throws Exception {
         // given
         Queue queue = TestFactories.getRandomQueue();
         String phoneNumberWithErrors = "123";
@@ -67,7 +67,7 @@ class TurnControllerTest extends AbstractContainerBaseTest {
     }
 
     @Test
-    void shouldReturn404_WhenParentQueueDoesNotExist() throws Exception {
+    void createTurn_shouldReturn404_WhenParentQueueDoesNotExist() throws Exception {
         // given
         long nonExistentQueueId = 123;
         String phoneNumber = "+573002930008";
@@ -89,7 +89,7 @@ class TurnControllerTest extends AbstractContainerBaseTest {
     }
 
     @Test
-    void shouldNotRepeatTurns_WhenTurnsAreCreatedInParallel() throws Exception {
+    void createTurn_shouldNotRepeatTurns_WhenTurnsAreCreatedInParallel() throws Exception {
         int repetitions = 5;
         int concurrent = 10;
         ExecutorService pool = Executors.newFixedThreadPool(concurrent);
@@ -166,7 +166,7 @@ class TurnControllerTest extends AbstractContainerBaseTest {
     }
 
     @Test
-    void shouldReturn201_WhenTurnIsCreatedInQueue() throws Exception {
+    void createTurn_shouldReturn201_WhenTurnIsCreatedInQueue() throws Exception {
         // given
         Queue createdQueue = createQueue();
         long queueId = createdQueue.getId();
@@ -191,7 +191,7 @@ class TurnControllerTest extends AbstractContainerBaseTest {
     }
 
     @Test
-    void shouldReturn201_WhenTurnIsCreatedInQueue_AndInitialTurnIsA100() throws Exception {
+    void createTurn_shouldReturn201_WhenTurnIsCreatedInQueue_AndInitialTurnIsA100() throws Exception {
         // given
         String initialTurn = "A100";
         Queue createdQueue = createQueue(initialTurn);
