@@ -55,6 +55,10 @@ public class TurnService {
         return new Turn(phoneNumber, queue.getId(), nextTurnNumber);
     }
 
+    public Optional<Turn> getPhoneNumberLatestTurn(String phoneNumber) {
+        return repository.getLatestTurnByPhoneNumber(phoneNumber);
+    }
+
     /**
      * Cancels the latest turn of the given phone number if it is in one of
      * the following states: Requested, Ready.
@@ -63,7 +67,7 @@ public class TurnService {
      * @return A Turn within an optional if the turn exists, otherwise an empty optional
      */
     public Optional<Turn> cancel(String phoneNumber) {
-        Optional<Turn> latestTurn = repository.getLatestTurnByPhoneNumber(phoneNumber);
+        Optional<Turn> latestTurn = getPhoneNumberLatestTurn(phoneNumber);
         if (latestTurn.isEmpty()) {
             return latestTurn;
         }
