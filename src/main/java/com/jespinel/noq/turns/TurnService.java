@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 
 @Service
 public class TurnService {
@@ -51,5 +53,31 @@ public class TurnService {
     private Turn generateNextTurn(String phoneNumber, Queue queue) {
         TurnNumber nextTurnNumber = turnNumberService.getNextTurn(queue);
         return new Turn(phoneNumber, queue.getId(), nextTurnNumber);
+    }
+
+    /**
+     * Cancels the latest turn of the given phone number if it is in one of
+     * the following states: Requested, Ready.
+     *
+     * @param phoneNumber The phone number associated to the turn we want to cancel
+     * @return A Turn within an optional if the turn exists, otherwise an empty optional
+     */
+    public Optional<Turn> cancel(String phoneNumber) {
+        Optional<Turn> latestTurn = repository.getLatestTurnByPhoneNumber(phoneNumber);
+        if (latestTurn.isEmpty()) {
+            return latestTurn;
+        }
+
+        try {
+            Turn turn = latestTurn.get();
+            turnStateService.moveToState(turn.getId(), TurnStateValue.CANCELLED);
+            notificationService.notifyCancellation(turn);
+            return latestTurn;
+        } catch (IllegalStateException e) {
+            logger.error(e.getMessage(), e);
+            String errorMessage = "The turn has started, it cannot be cancelled";
+            notificationService.notifyError(errorMessage, phoneNumber);
+            return Optional.empty();
+        }
     }
 }
