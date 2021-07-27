@@ -23,8 +23,11 @@ public class TurnRepository {
 
     private static final String FIND_TURN_SQL = "SELECT * FROM turns WHERE id = :id";
 
-    private static final String GET_LATEST_TURN_SQL =
+    private static final String GET_LATEST_TURN_BY_QUEUE_ID_SQL =
             "SELECT * FROM turns WHERE queue_id = :queueId ORDER BY id DESC LIMIT 1";
+
+    private static final String GET_LATEST_TURN_BY_PHONE_NUMBER_SQL =
+            "SELECT * FROM turns WHERE phone_number = :phoneNumber ORDER BY id DESC LIMIT 1";
 
     private static final String[] ID = {"id"};
 
@@ -59,10 +62,18 @@ public class TurnRepository {
         }
     }
 
-    Optional<Turn> getLatestTurn(long queueId) {
+    Optional<Turn> getLatestTurnByQueue(long queueId) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("queueId", queueId);
-        List<Turn> turns = jdbcTemplate.query(GET_LATEST_TURN_SQL, params, new TurnRowMapper());
+        List<Turn> turns = jdbcTemplate.query(GET_LATEST_TURN_BY_QUEUE_ID_SQL, params, new TurnRowMapper());
+        Turn turn = DataAccessUtils.singleResult(turns);
+        return Optional.ofNullable(turn);
+    }
+
+    public Optional<Turn> getLatestTurnByPhoneNumber(String phoneNumber) {
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("phoneNumber", phoneNumber);
+        List<Turn> turns = jdbcTemplate.query(GET_LATEST_TURN_BY_PHONE_NUMBER_SQL, params, new TurnRowMapper());
         Turn turn = DataAccessUtils.singleResult(turns);
         return Optional.ofNullable(turn);
     }
