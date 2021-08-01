@@ -1,14 +1,8 @@
 package com.jespinel.noq.turns;
 
 import com.jespinel.noq.AbstractContainerBaseTest;
-import com.jespinel.noq.TestFactories;
-import com.jespinel.noq.branches.Branch;
-import com.jespinel.noq.branches.BranchService;
 import com.jespinel.noq.common.exceptions.ApiError;
-import com.jespinel.noq.companies.Company;
-import com.jespinel.noq.companies.CompanyService;
 import com.jespinel.noq.queues.Queue;
-import com.jespinel.noq.queues.QueueService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,15 +25,7 @@ class TurnControllerTest extends AbstractContainerBaseTest {
     private static final String TURNS_URL = "/api/turns";
 
     @Autowired
-    private CompanyService companyService;
-
-    @Autowired
-    private BranchService branchService;
-
-    @Autowired
-    private QueueService queueService;
-
-    @Autowired TurnService turnService;
+    private TurnService turnService;
 
     @AfterEach
     void tearDown() {
@@ -50,10 +36,10 @@ class TurnControllerTest extends AbstractContainerBaseTest {
     @Test
     void createTurn_shouldReturn400_WhenPhoneNumberIsNotValid() throws Exception {
         // given
-        Queue queue = TestFactories.getRandomQueue();
+        Queue queue = testFactories.getRandomQueue();
         String phoneNumberWithErrors = "123";
 
-        CreateTurnRequest notValidPhoneNumber = TestFactories
+        CreateTurnRequest notValidPhoneNumber = testFactories
                 .getCreateTurnRequest(phoneNumberWithErrors, queue.getId());
 
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(TURNS_URL)
@@ -74,7 +60,7 @@ class TurnControllerTest extends AbstractContainerBaseTest {
         long nonExistentQueueId = 123;
         String phoneNumber = "+573002930008";
 
-        CreateTurnRequest notValidPhoneNumber = TestFactories
+        CreateTurnRequest notValidPhoneNumber = testFactories
                 .getCreateTurnRequest(phoneNumber, nonExistentQueueId);
 
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(TURNS_URL)
@@ -119,7 +105,7 @@ class TurnControllerTest extends AbstractContainerBaseTest {
 
         int limit = 9_999;
         String basePhoneNumber = "+57300293";
-        Queue queue = createQueue();
+        Queue queue = testFactories.createTestQueueInDB();
 
         for (int thread = 0; thread < concurrent; thread++) {
             String phoneNumber = basePhoneNumber + limit;
@@ -147,7 +133,7 @@ class TurnControllerTest extends AbstractContainerBaseTest {
         @Override
         public TurnNumber call() throws Exception {
             // given
-            CreateTurnRequest notValidPhoneNumber = TestFactories
+            CreateTurnRequest notValidPhoneNumber = testFactories
                     .getCreateTurnRequest(phoneNumber, queueId);
 
             MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(TURNS_URL)
@@ -170,11 +156,11 @@ class TurnControllerTest extends AbstractContainerBaseTest {
     @Test
     void createTurn_shouldReturn201_WhenTurnIsCreatedInQueue() throws Exception {
         // given
-        Queue createdQueue = createQueue();
+        Queue createdQueue = testFactories.createTestQueueInDB();
         long queueId = createdQueue.getId();
         String phoneNumber = "+573002930008";
 
-        CreateTurnRequest createTurnRequest = TestFactories
+        CreateTurnRequest createTurnRequest = testFactories
                 .getCreateTurnRequest(phoneNumber, queueId);
 
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(TURNS_URL)
@@ -197,11 +183,11 @@ class TurnControllerTest extends AbstractContainerBaseTest {
     void createTurn_shouldReturn201_WhenTurnIsCreatedInQueue_AndInitialTurnIsA100() throws Exception {
         // given
         String initialTurn = "A100";
-        Queue createdQueue = createQueue(initialTurn);
+        Queue createdQueue = testFactories.createTestQueueInDB(initialTurn);
         long queueId = createdQueue.getId();
         String phoneNumber = "+573002930008";
 
-        CreateTurnRequest createTurnRequest = TestFactories
+        CreateTurnRequest createTurnRequest = testFactories
                 .getCreateTurnRequest(phoneNumber, queueId);
 
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(TURNS_URL)
@@ -258,7 +244,7 @@ class TurnControllerTest extends AbstractContainerBaseTest {
     @Test
     void cancelTurn_shouldReturn200WithBody_WhenThePhoneNumberHasAnAssociatedTurn() throws Exception {
         // given
-        Queue queue = createQueue();
+        Queue queue = testFactories.createTestQueueInDB();
         String validPhoneNumber = "+573002930008";
         Turn existentTurn = turnService.create(validPhoneNumber, queue.getId());
 

@@ -40,6 +40,9 @@ public abstract class AbstractContainerBaseTest {
     private StringRedisTemplate redisTemplate;
 
     @Autowired
+    protected TestFactories testFactories;
+
+    @Autowired
     protected ObjectMapper objectMapper;
 
     @Autowired
