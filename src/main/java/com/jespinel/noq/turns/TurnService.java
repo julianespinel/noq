@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.Optional;
 
@@ -17,6 +19,7 @@ public class TurnService {
 
     final Logger logger = LoggerFactory.getLogger(TurnService.class);
 
+    private final TransactionTemplate transactionTemplate;
     private final TurnRepository repository;
     private final QueueService queueService;
     private final TurnStateService turnStateService;
@@ -24,9 +27,13 @@ public class TurnService {
     private final TurnNumberService turnNumberService;
 
     @Autowired
-    public TurnService(TurnRepository repository, QueueService queueService,
-                       TurnStateService turnStateService, NotificationService notificationService,
+    public TurnService(TransactionTemplate transactionTemplate,
+                       TurnRepository repository,
+                       QueueService queueService,
+                       TurnStateService turnStateService,
+                       NotificationService notificationService,
                        TurnNumberService turnNumberService) {
+        this.transactionTemplate = transactionTemplate;
         this.repository = repository;
         this.queueService = queueService;
         this.turnStateService = turnStateService;
@@ -36,6 +43,9 @@ public class TurnService {
 
     /**
      * Create a new turn in queue.
+     * <p>
+     * This method inserts a new row in the table turns and turn_states
+     * in a single transaction.
      *
      * @param phoneNumber phone number used to take a new turn
      * @param queueId     ID of the queue where we are going to take a new turn from
@@ -44,10 +54,24 @@ public class TurnService {
     public Turn create(String phoneNumber, long queueId) {
         Queue queue = queueService.getOrThrow(queueId);
         Turn nextTurn = generateNextTurn(phoneNumber, queue);
-        Turn savedTurn = repository.saveOrThrow(nextTurn);
-        turnStateService.create(savedTurn.getId());
+        Turn savedTurn = transactionTemplate.execute(createTurnTransaction(nextTurn));
         notificationService.notifyTurnCreation(savedTurn);
         return savedTurn;
+
+    }
+
+    /**
+     * Creates a turn in a single transaction.
+     *
+     * @param turn The turn we want to create
+     * @return A transaction callback to be used by a transactionTemplate.
+     */
+    private TransactionCallback<Turn> createTurnTransaction(Turn turn) {
+        return transactionStatus -> {
+            Turn savedTurn = repository.saveOrThrow(turn);
+            turnStateService.create(savedTurn.getId());
+            return savedTurn;
+        };
     }
 
     private Turn generateNextTurn(String phoneNumber, Queue queue) {
