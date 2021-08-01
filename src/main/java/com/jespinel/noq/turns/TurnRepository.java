@@ -18,8 +18,8 @@ import java.util.Optional;
 public class TurnRepository {
 
     private static final String CREATE_TURN_SQL =
-            "INSERT INTO turns (turn_number, phone_number, queue_id, created_at, updated_at) " +
-                    "VALUES (:turnNumber, :phoneNumber, :queueId, :createdAt, :updatedAt)";
+            "INSERT INTO turns (turn_number, phone_number, queue_id, current_state, created_at, updated_at) " +
+                    "VALUES (:turnNumber, :phoneNumber, :queueId, :currentState, :createdAt, :updatedAt)";
 
     private static final String FIND_TURN_SQL = "SELECT * FROM turns WHERE id = :id";
 
@@ -43,6 +43,7 @@ public class TurnRepository {
                 .addValue("turnNumber", turn.getTurnNumber().toString())
                 .addValue("phoneNumber", turn.getPhoneNumber())
                 .addValue("queueId", turn.getQueueId())
+                .addValue("currentState", turn.getCurrentState().toString())
                 .addValue("createdAt", turn.getCreatedAt())
                 .addValue("updatedAt", turn.getUpdatedAt());
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();

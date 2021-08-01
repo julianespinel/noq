@@ -52,7 +52,7 @@ public class TurnService {
 
     private Turn generateNextTurn(String phoneNumber, Queue queue) {
         TurnNumber nextTurnNumber = turnNumberService.getNextTurn(queue);
-        return new Turn(phoneNumber, queue.getId(), nextTurnNumber);
+        return new Turn(phoneNumber, queue.getId(), nextTurnNumber, TurnStateValue.REQUESTED);
     }
 
     public Optional<Turn> getPhoneNumberLatestTurn(String phoneNumber) {

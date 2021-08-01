@@ -190,6 +190,7 @@ class TurnControllerTest extends AbstractContainerBaseTest {
         assertThat(turn.getPhoneNumber()).isEqualTo(phoneNumber);
         assertThat(turn.getTurnNumber().toString()).isEqualTo("A1");
         assertThat(turn.getQueueId()).isEqualTo(queueId);
+        assertThat(turn.getCurrentState()).isEqualTo(TurnStateValue.REQUESTED);
     }
 
     @Test
@@ -216,6 +217,7 @@ class TurnControllerTest extends AbstractContainerBaseTest {
         assertThat(turn.getPhoneNumber()).isEqualTo(phoneNumber);
         assertThat(turn.getTurnNumber().toString()).isEqualTo("A101");
         assertThat(turn.getQueueId()).isEqualTo(queueId);
+        assertThat(turn.getCurrentState()).isEqualTo(TurnStateValue.REQUESTED);
     }
 
     @Test
