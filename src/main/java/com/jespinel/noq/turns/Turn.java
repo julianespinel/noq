@@ -10,7 +10,7 @@ public class Turn {
     private final String phoneNumber;
     private final long queueId;
     private final TurnNumber turnNumber;
-    private TurnStateValue currentState;
+    private final TurnStateValue currentState;
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
 
