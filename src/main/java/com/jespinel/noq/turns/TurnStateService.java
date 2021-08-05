@@ -1,6 +1,7 @@
 package com.jespinel.noq.turns;
 
 import com.jespinel.noq.common.exceptions.EntityNotFoundException;
+import com.jespinel.noq.common.exceptions.TurnStateTransitionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ public class TurnStateService {
      * Define state machine for turns
      */
     private static final Map<TurnStateValue, List<TurnStateValue>> stateToTransitions;
+
     static {
         stateToTransitions = new HashMap<>();
 
@@ -45,6 +47,14 @@ public class TurnStateService {
         return turnStateRepository.save(requested);
     }
 
+    /**
+     * Creates a new TurnState with the given targetState as the state.
+     * This method inserts a new row in the table turn_states.
+     *
+     * @param turnId      The ID of the turn we want to update to a new state.
+     * @param targetState The new state of the turn.
+     * @return The new TurnState saved in the database.
+     */
     TurnState moveToState(long turnId, TurnStateValue targetState) {
         TurnState currentState = getOrThrowByTurnId(turnId);
         TurnState nextState = moveToStateInternal(currentState, targetState);
@@ -63,7 +73,7 @@ public class TurnStateService {
 
         String template = "Turn %s can't transition from %s to %s";
         String errorMessage = template.formatted(turnId, currentStateValue, targetStateValue);
-        throw new IllegalStateException(errorMessage);
+        throw new TurnStateTransitionException(errorMessage);
     }
 
     private void logStateTransition(TurnStateValue targetStateValue, long turnId, TurnStateValue currentStateValue) {
