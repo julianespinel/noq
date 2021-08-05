@@ -8,8 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
-
 @RestController
 @RequestMapping("/api/turns")
 public class TurnController {
@@ -34,13 +32,15 @@ public class TurnController {
     @DeleteMapping
     public ResponseEntity<Turn> cancel(@RequestBody CancelTurnRequest request) {
         request.validateOrThrow();
-        Optional<Turn> optionalTurn = service.cancel(request.phoneNumber());
-        if (optionalTurn.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.OK).build();
-        }
-
-        Turn turn = optionalTurn.get();
+        Turn turn = service.cancel(request.phoneNumber());
         logger.debug("The turn %s was cancelled in the queue %s".formatted(turn.getTurnNumber(), turn.getQueueId()));
+        return ResponseEntity.status(HttpStatus.OK).body(turn);
+    }
+
+    @PutMapping
+    public ResponseEntity<Turn> callNextTurn(@RequestBody CallNextTurnRequest request) {
+        request.validateOrThrow();
+        Turn turn = service.callNextTurn(request.queueId());
         return ResponseEntity.status(HttpStatus.OK).body(turn);
     }
 }

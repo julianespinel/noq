@@ -1,6 +1,8 @@
 package com.jespinel.noq.turns;
 
 
+import com.jespinel.noq.common.exceptions.EmptyQueueException;
+import com.jespinel.noq.common.exceptions.EntityNotFoundException;
 import com.jespinel.noq.notifications.NotificationService;
 import com.jespinel.noq.queues.Queue;
 import com.jespinel.noq.queues.QueueService;
@@ -57,7 +59,6 @@ public class TurnService {
         Turn savedTurn = transactionTemplate.execute(createTurnTransaction(nextTurn));
         notificationService.notifyTurnCreation(savedTurn);
         return savedTurn;
-
     }
 
     /**
@@ -86,26 +87,68 @@ public class TurnService {
     /**
      * Cancels the latest turn of the given phone number if it is in one of
      * the following states: Requested, Ready.
+     * <p>
+     * This method inserts a new row in the table turn_states and updates
+     * the current_state of the turn in the table turns in a single transaction.
      *
      * @param phoneNumber The phone number associated to the turn we want to cancel
      * @return A Turn within an optional if the turn exists, otherwise an empty optional
      */
-    public Optional<Turn> cancel(String phoneNumber) {
-        Optional<Turn> latestTurn = getPhoneNumberLatestTurn(phoneNumber);
-        if (latestTurn.isEmpty()) {
-            return latestTurn;
+    public Turn cancel(String phoneNumber) {
+        Optional<Turn> phoneNumberTurn = getPhoneNumberLatestTurn(phoneNumber);
+        if (phoneNumberTurn.isEmpty()) {
+            String errorTemplate = "%s does not have associated turns";
+            String errorMessage = errorTemplate.formatted(phoneNumber);
+            throw new EntityNotFoundException(errorMessage);
         }
 
-        try {
-            Turn turn = latestTurn.get();
-            turnStateService.moveToState(turn.getId(), TurnStateValue.CANCELLED);
-            notificationService.notifyCancellation(turn);
-            return latestTurn;
-        } catch (IllegalStateException e) {
-            logger.error(e.getMessage(), e);
-            String errorMessage = "The turn has started, it cannot be cancelled";
-            notificationService.notifyError(errorMessage, phoneNumber);
-            return Optional.empty();
+        // Cancel turn
+        Turn turn = phoneNumberTurn.get();
+        Turn updatedTurn = transactionTemplate.execute(updateTurnCurrentState(turn.getId(), TurnStateValue.CANCELLED));
+        notificationService.notifyCancellation(turn);
+
+        // If the cancelled turn was in READY state, call the next turn
+        if (turn.getCurrentState().equals(TurnStateValue.READY)) {
+            callNextTurn(turn.getQueueId());
         }
+
+        return updatedTurn;
+    }
+
+    /**
+     * Update turn and turn_state in a single transaction
+     *
+     * @param turnId   The ID of the turn we want to update
+     * @param newState The new state we want to assign to the turn
+     * @return The updated turn
+     */
+    private TransactionCallback<Turn> updateTurnCurrentState(long turnId, TurnStateValue newState) {
+        return transactionStatus -> {
+            repository.updateTurnCurrentState(turnId, newState);
+            turnStateService.moveToState(turnId, newState);
+            return getOrThrow(turnId);
+        };
+    }
+
+    public Turn callNextTurn(long queueId) {
+        queueService.getOrThrow(queueId);
+        Optional<Turn> optionalTurn = repository.getOldestRequestedTurn(queueId);
+        if (optionalTurn.isEmpty()) {
+            throw new EmptyQueueException("The queue is empty, there are no turns to call");
+        }
+
+        Turn nextTurn = optionalTurn.get();
+        Turn updatedTurn = transactionTemplate.execute(updateTurnCurrentState(nextTurn.getId(), TurnStateValue.READY));
+        notificationService.notifyReadiness(updatedTurn);
+        return updatedTurn;
+    }
+
+    public Turn getOrThrow(long turnId) {
+        Optional<Turn> turn = repository.findById(turnId);
+        turn.orElseThrow(() -> {
+            String errorMessage = "The turn with ID %s was not found".formatted(turnId);
+            throw new EntityNotFoundException(errorMessage);
+        });
+        return turn.get();
     }
 }

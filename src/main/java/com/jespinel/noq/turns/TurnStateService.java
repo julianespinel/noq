@@ -83,7 +83,7 @@ public class TurnStateService {
     }
 
     private TurnState getOrThrowByTurnId(long turnId) {
-        Optional<TurnState> currentState = turnStateRepository.findByTurnId(turnId);
+        Optional<TurnState> currentState = turnStateRepository.findLatestStateByTurnId(turnId);
         currentState.orElseThrow(() -> {
             String errorMessage = "Turn %s does not have states".formatted(turnId);
             throw new EntityNotFoundException(errorMessage);
