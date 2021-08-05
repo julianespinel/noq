@@ -12,10 +12,8 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.concurrent.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,11 +25,18 @@ class TurnControllerTest extends AbstractContainerBaseTest {
     @Autowired
     private TurnService turnService;
 
+    @Autowired
+    private TurnStateRepository turnStateRepository;
+
     @AfterEach
     void tearDown() {
         cleanCache();
         cleanDatabase();
     }
+
+    //--------------------------------------------------------------------------
+    // Create turn
+    //--------------------------------------------------------------------------
 
     @Test
     void createTurn_shouldReturn400_WhenPhoneNumberIsNotValid() throws Exception {
@@ -206,6 +211,10 @@ class TurnControllerTest extends AbstractContainerBaseTest {
         assertThat(turn.getCurrentState()).isEqualTo(TurnStateValue.REQUESTED);
     }
 
+    //--------------------------------------------------------------------------
+    // Cancel turn
+    //--------------------------------------------------------------------------
+
     @Test
     void cancelTurn_shouldReturn400_WhenPhoneNumberIsNotValid() throws Exception {
         // given
@@ -225,7 +234,7 @@ class TurnControllerTest extends AbstractContainerBaseTest {
     }
 
     @Test
-    void cancelTurn_shouldReturn200AndNoBody_WhenThePhoneNumberDoesNotHaveAnAssociatedTurn() throws Exception {
+    void cancelTurn_shouldReturn404_WhenThePhoneNumberDoesNotHaveAssociatedTurns() throws Exception {
         // given
         String validPhoneNumber = "+573002930008";
         CancelTurnRequest cancelTurnRequest = new CancelTurnRequest(validPhoneNumber);
@@ -237,12 +246,43 @@ class TurnControllerTest extends AbstractContainerBaseTest {
         // when
         MockHttpServletResponse response = mockMvc.perform(request).andReturn().getResponse();
         // then
-        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
-        assertThat(response.getContentAsString()).isEmpty();
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
+
+        ApiError apiError = objectMapper.readValue(response.getContentAsString(), ApiError.class);
+        assertThat(apiError.error()).isEqualTo(validPhoneNumber + " does not have associated turns");
     }
 
     @Test
-    void cancelTurn_shouldReturn200WithBody_WhenThePhoneNumberHasAnAssociatedTurn() throws Exception {
+    void cancelTurn_shouldReturn409_WhenTurnCannotBeCancelled() throws Exception {
+        // given
+        Queue queue = testFactories.createTestQueueInDB();
+        String validPhoneNumber = "+573002930008";
+        Turn existentTurn = turnService.create(validPhoneNumber, queue.getId());
+
+        // Change turn state from requested to started
+        Optional<TurnState> turnState = turnStateRepository.findLatestStateByTurnId(existentTurn.getId());
+        TurnState requested = turnState.get();
+        LocalDateTime now = LocalDateTime.now();
+        TurnState started = new TurnState(requested.getId(), requested.getTurnId(), TurnStateValue.STARTED, now, now);
+        turnStateRepository.save(started);
+
+        CancelTurnRequest cancelTurnRequest = new CancelTurnRequest(validPhoneNumber);
+
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.delete(TURNS_URL)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(cancelTurnRequest));
+        // when
+        MockHttpServletResponse response = mockMvc.perform(request).andReturn().getResponse();
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.CONFLICT.value());
+
+        ApiError apiError = objectMapper.readValue(response.getContentAsString(), ApiError.class);
+        assertThat(apiError.error()).contains("can't transition from STARTED to CANCELLED");
+    }
+
+    @Test
+    void cancelTurn_shouldReturn200_WhenThePhoneNumberHasAssociatedTurns() throws Exception {
         // given
         Queue queue = testFactories.createTestQueueInDB();
         String validPhoneNumber = "+573002930008";
@@ -263,27 +303,163 @@ class TurnControllerTest extends AbstractContainerBaseTest {
         assertThat(turn.getPhoneNumber()).isEqualTo(validPhoneNumber);
         assertThat(turn.getTurnNumber().toString()).isEqualTo(existentTurn.getTurnNumber().toString());
         assertThat(turn.getQueueId()).isEqualTo(queue.getId());
+        assertThat(turn.getCurrentState()).isEqualTo(TurnStateValue.CANCELLED);
     }
 
-    private Queue createQueue() {
-        Company company = TestFactories.getRandomCompany();
-        Company createdCompany = companyService.create(company);
+    @Test
+    void cancelTurn_shouldReturn200AndCallNextTurn_WhenCancellingTurnInReadyState() throws Exception {
+        // given
+        Queue queue = testFactories.createTestQueueInDB();
+        long queueId = queue.getId();
 
-        Branch branch = TestFactories.getRandomBranch(createdCompany.getId());
-        Branch createdBranch = branchService.create(branch);
+        String phoneNumberOne = "+573002930001";
+        Turn turnOne = turnService.create(phoneNumberOne, queueId);
+        turnService.callNextTurn(queueId);// Set turn state to ready
 
-        Queue queue = TestFactories.getRandomQueue(createdBranch.getId());
-        return queueService.create(queue);
+        String phoneNumberTwo = "+573002930002";
+        Turn turnTwo = turnService.create(phoneNumberTwo, queueId);// Current turn state is requested
+
+        CancelTurnRequest cancelTurnRequest = new CancelTurnRequest(phoneNumberOne);
+
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.delete(TURNS_URL)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(cancelTurnRequest));
+        // when
+        MockHttpServletResponse response = mockMvc.perform(request).andReturn().getResponse();
+        // then
+        // Check turnOne is cancelled
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        Turn turn = objectMapper.readValue(response.getContentAsString(), Turn.class);
+        assertThat(turn.getId()).isEqualTo(turnOne.getId());
+        assertThat(turn.getPhoneNumber()).isEqualTo(phoneNumberOne);
+        assertThat(turn.getTurnNumber().toString()).isEqualTo(turnOne.getTurnNumber().toString());
+        assertThat(turn.getQueueId()).isEqualTo(queue.getId());
+        assertThat(turn.getCurrentState()).isEqualTo(TurnStateValue.CANCELLED);
+
+        // Check turnTwo is ready
+        // turnTwo should have been called when turnOne (in ready state) was cancelled
+        Turn ready = turnService.getOrThrow(turnTwo.getId());
+        assertThat(ready.getPhoneNumber()).isEqualTo(phoneNumberTwo);
+        assertThat(ready.getCurrentState()).isEqualTo(TurnStateValue.READY);
+
+        // turnTwo latest state should be ready
+        Optional<TurnState> optional = turnStateRepository.findLatestStateByTurnId(ready.getId());
+        assertThat(optional).isNotEmpty();
+        TurnState turnTwoState = optional.get();
+        assertThat(turnTwoState.getState()).isEqualTo(TurnStateValue.READY);
     }
 
-    private Queue createQueue(String initialTurn) {
-        Company company = TestFactories.getRandomCompany();
-        Company createdCompany = companyService.create(company);
+    //--------------------------------------------------------------------------
+    // Call next turn
+    //--------------------------------------------------------------------------
 
-        Branch branch = TestFactories.getRandomBranch(createdCompany.getId());
-        Branch createdBranch = branchService.create(branch);
+    @Test
+    void callNextTurn_shouldReturn400_whenGivenQueueIdIsNotValid() throws Exception {
+        // given
+        CallNextTurnRequest notValidQueueIdRequest = new CallNextTurnRequest(-1);
 
-        Queue queue = TestFactories.getRandomQueue(createdBranch.getId(), initialTurn);
-        return queueService.create(queue);
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.put(TURNS_URL)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(notValidQueueIdRequest));
+        // when
+        MockHttpServletResponse response = mockMvc.perform(request).andReturn().getResponse();
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        ApiError apiError = objectMapper.readValue(response.getContentAsString(), ApiError.class);
+        assertThat(apiError.error()).isEqualTo("The given queue id is not valid");
+    }
+
+    @Test
+    void callNextTurn_shouldReturn409_whenQueueIsEmpty() throws Exception {
+        // given
+        Queue queue = testFactories.createTestQueueInDB();
+        CallNextTurnRequest callNextTurnRequest = new CallNextTurnRequest(queue.getId());
+
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.put(TURNS_URL)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(callNextTurnRequest));
+        // when
+        MockHttpServletResponse response = mockMvc.perform(request).andReturn().getResponse();
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.CONFLICT.value());
+        ApiError apiError = objectMapper.readValue(response.getContentAsString(), ApiError.class);
+        assertThat(apiError.error()).isEqualTo("The queue is empty, there are no turns to call");
+    }
+
+    @Test
+    void callNextTurn_shouldReturn200_whenQueueHasASingleRequestedTurn() throws Exception {
+        // given
+        Queue queue = testFactories.createTestQueueInDB();
+        long queueId = queue.getId();
+
+        String phoneNumberOne = "+573002930001";
+        turnService.create(phoneNumberOne, queueId);
+        turnService.callNextTurn(queueId);// Set turn state to ready
+
+        String phoneNumberTwo = "+573002930002";
+        turnService.create(phoneNumberTwo, queueId);
+        turnService.callNextTurn(queueId);// Set turn state to ready
+
+        String phoneNumberThree = "+573002930003";
+        Turn requestedTurn = turnService.create(phoneNumberThree, queueId);
+        // Only turn in requested state ^
+
+        CallNextTurnRequest callNextTurnRequest = new CallNextTurnRequest(queueId);
+
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.put(TURNS_URL)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(callNextTurnRequest));
+        // when
+        MockHttpServletResponse response = mockMvc.perform(request).andReturn().getResponse();
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+
+        Turn turn = objectMapper.readValue(response.getContentAsString(), Turn.class);
+        assertThat(turn.getId()).isEqualTo(requestedTurn.getId());
+        assertThat(turn.getPhoneNumber()).isEqualTo(phoneNumberThree);
+        assertThat(turn.getTurnNumber().toString()).isEqualTo(requestedTurn.getTurnNumber().toString());
+        assertThat(turn.getQueueId()).isEqualTo(queueId);
+        assertThat(turn.getCurrentState()).isEqualTo(TurnStateValue.READY);
+    }
+
+    @Test
+    void callNextTurn_shouldReturn200AndTheOldestTurnInRequestState_whenQueueHasManyRequestedTurns() throws Exception {
+        // given
+        Queue queue = testFactories.createTestQueueInDB();
+        long queueId = queue.getId();
+
+        String phoneNumberOne = "+573002930001";
+        Turn firstRequestedTurn = turnService.create(phoneNumberOne, queueId);
+        // Turn in requested state ^
+
+        String phoneNumberTwo = "+573002930002";
+        turnService.create(phoneNumberTwo, queueId);
+        // Turn in requested state ^
+
+        String phoneNumberThree = "+573002930003";
+        turnService.create(phoneNumberThree, queueId);
+        // Turn in requested state ^
+
+        CallNextTurnRequest callNextTurnRequest = new CallNextTurnRequest(queueId);
+
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.put(TURNS_URL)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(callNextTurnRequest));
+        // when
+        MockHttpServletResponse response = mockMvc.perform(request).andReturn().getResponse();
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+
+        Turn turn = objectMapper.readValue(response.getContentAsString(), Turn.class);
+        assertThat(turn.getId()).isEqualTo(firstRequestedTurn.getId());
+        assertThat(turn.getPhoneNumber()).isEqualTo(phoneNumberOne);
+        assertThat(turn.getTurnNumber().toString()).isEqualTo(firstRequestedTurn.getTurnNumber().toString());
+        assertThat(turn.getQueueId()).isEqualTo(queueId);
+        assertThat(turn.getCurrentState()).isEqualTo(TurnStateValue.READY);
     }
 }
