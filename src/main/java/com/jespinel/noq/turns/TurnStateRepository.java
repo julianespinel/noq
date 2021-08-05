@@ -19,11 +19,13 @@ public class TurnStateRepository {
             "INSERT INTO turn_states (turn_id, state, created_at, updated_at) " +
                     "VALUES (:turnId, :state, :createdAt, :updatedAt)";
 
-    private static final String FIND_TURN_STATE_BY_TURN_ID_SQL =
-            "SELECT * FROM turn_states WHERE turn_id = :turnId";
+    private static final String FIND_LATEST_TURN_STATE_BY_TURN_ID_SQL =
+            "SELECT * FROM turn_states WHERE turn_id = :turnId ORDER BY id DESC LIMIT 1";
 
     private static final String GET_LATEST_TURN_STATE_SQL =
             "SELECT * FROM turn_states WHERE turn_id = :turnId ORDER BY id DESC LIMIT 1";
+
+    private static final String COUNT_SQL = "SELECT COUNT(*) FROM turn_states";
 
     private static final String[] ID = {"id"};
 
@@ -34,7 +36,7 @@ public class TurnStateRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public TurnState save(TurnState turnState) {
+    TurnState save(TurnState turnState) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("turnId", turnState.getTurnId())
                 .addValue("state", turnState.getState().toString())
@@ -47,11 +49,17 @@ public class TurnStateRepository {
         return TurnState.from(id, turnState);
     }
 
-    public Optional<TurnState> findByTurnId(long turnId) {
+    Optional<TurnState> findLatestStateByTurnId(long turnId) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("turnId", turnId);
-        List<TurnState> turnStates = jdbcTemplate.query(FIND_TURN_STATE_BY_TURN_ID_SQL, params, new TurnStateRowMapper());
+        List<TurnState> turnStates = jdbcTemplate
+                .query(FIND_LATEST_TURN_STATE_BY_TURN_ID_SQL, params, new TurnStateRowMapper());
         TurnState turnState = DataAccessUtils.singleResult(turnStates);
         return Optional.ofNullable(turnState);
+    }
+
+    Long count() {
+        SqlParameterSource params = new MapSqlParameterSource();
+        return jdbcTemplate.queryForObject(COUNT_SQL, params, Long.class);
     }
 }
