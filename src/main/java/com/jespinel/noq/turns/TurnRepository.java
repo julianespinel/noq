@@ -18,16 +18,28 @@ import java.util.Optional;
 public class TurnRepository {
 
     private static final String CREATE_TURN_SQL =
-            "INSERT INTO turns (turn_number, phone_number, queue_id, created_at, updated_at) " +
-                    "VALUES (:turnNumber, :phoneNumber, :queueId, :createdAt, :updatedAt)";
+            "INSERT INTO turns (turn_number, phone_number, queue_id, current_state, created_at, updated_at) " +
+                    "VALUES (:turnNumber, :phoneNumber, :queueId, :currentState, :createdAt, :updatedAt)";
 
-    private static final String FIND_TURN_SQL = "SELECT * FROM turns WHERE id = :id";
+    private static final String FIND_TURN_BY_ID_SQL = "SELECT * FROM turns WHERE id = :id";
 
     private static final String GET_LATEST_TURN_BY_QUEUE_ID_SQL =
             "SELECT * FROM turns WHERE queue_id = :queueId ORDER BY id DESC LIMIT 1";
 
     private static final String GET_LATEST_TURN_BY_PHONE_NUMBER_SQL =
             "SELECT * FROM turns WHERE phone_number = :phoneNumber ORDER BY id DESC LIMIT 1";
+
+    private static final String GET_OLDEST_TURN_BY_CURRENT_STATE_QUEUE_ID_SQL = """
+            SELECT * FROM turns
+            WHERE queue_id = :queueId
+            AND current_state = :turnState
+            ORDER BY id ASC LIMIT 1
+            """;
+
+    private static final String UPDATE_CURRENT_STATE_BY_ID_SQL =
+            "UPDATE turns SET current_state = :currentState WHERE id = :id";
+
+    private static final String COUNT_SQL = "SELECT COUNT(*) FROM turns";
 
     private static final String[] ID = {"id"};
 
@@ -43,6 +55,7 @@ public class TurnRepository {
                 .addValue("turnNumber", turn.getTurnNumber().toString())
                 .addValue("phoneNumber", turn.getPhoneNumber())
                 .addValue("queueId", turn.getQueueId())
+                .addValue("currentState", turn.getCurrentState().toString())
                 .addValue("createdAt", turn.getCreatedAt())
                 .addValue("updatedAt", turn.getUpdatedAt());
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
@@ -70,11 +83,46 @@ public class TurnRepository {
         return Optional.ofNullable(turn);
     }
 
-    public Optional<Turn> getLatestTurnByPhoneNumber(String phoneNumber) {
+    Optional<Turn> getLatestTurnByPhoneNumber(String phoneNumber) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("phoneNumber", phoneNumber);
         List<Turn> turns = jdbcTemplate.query(GET_LATEST_TURN_BY_PHONE_NUMBER_SQL, params, new TurnRowMapper());
         Turn turn = DataAccessUtils.singleResult(turns);
         return Optional.ofNullable(turn);
+    }
+
+    /**
+     * Returns the oldest turn from a queue in state 'Requested'.
+     *
+     * @param queueId The ID of the queue we want to call the next turn from.
+     * @return The next turn to be called in a queue if exists, otherwise an empty optional.
+     */
+    Optional<Turn> getOldestRequestedTurn(long queueId) {
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("queueId", queueId)
+                .addValue("turnState", TurnStateValue.REQUESTED.toString());
+        List<Turn> turns = jdbcTemplate.query(GET_OLDEST_TURN_BY_CURRENT_STATE_QUEUE_ID_SQL, params, new TurnRowMapper());
+        Turn turn = DataAccessUtils.singleResult(turns);
+        return Optional.ofNullable(turn);
+    }
+
+    int updateTurnCurrentState(long turnId, TurnStateValue newState) {
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("id", turnId)
+                .addValue("currentState", newState.toString());
+        return jdbcTemplate.update(UPDATE_CURRENT_STATE_BY_ID_SQL, params);
+    }
+
+    Optional<Turn> findById(long turnId) {
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("id", turnId);
+        List<Turn> turns = jdbcTemplate.query(FIND_TURN_BY_ID_SQL, params, new TurnRowMapper());
+        Turn turn = DataAccessUtils.singleResult(turns);
+        return Optional.ofNullable(turn);
+    }
+
+    Long count() {
+        SqlParameterSource params = new MapSqlParameterSource();
+        return jdbcTemplate.queryForObject(COUNT_SQL, params, Long.class);
     }
 }

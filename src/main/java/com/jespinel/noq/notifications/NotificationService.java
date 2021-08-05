@@ -29,4 +29,10 @@ public class NotificationService {
     public void notifyError(String errorMessage, String phoneNumber) {
         smsNotifier.send(errorMessage, phoneNumber);
     }
+
+    public void notifyReadiness(Turn turn) {
+        String turnReadyTemplate = "The turn %s is ready";
+        String message = turnReadyTemplate.formatted(turn.getTurnNumber());
+        smsNotifier.send(message, turn.getPhoneNumber());
+    }
 }

@@ -1,7 +1,6 @@
 package com.jespinel.noq.queues;
 
 import com.jespinel.noq.AbstractContainerBaseTest;
-import com.jespinel.noq.TestFactories;
 import com.jespinel.noq.branches.Branch;
 import com.jespinel.noq.branches.BranchService;
 import com.jespinel.noq.common.exceptions.ApiError;
@@ -41,7 +40,7 @@ class QueueControllerTest extends AbstractContainerBaseTest {
     @Test
     void shouldReturn400_WhenRequestIsNotValid() throws Exception {
         // given
-        CreateQueueRequest notValidBranchId = TestFactories.getCreateQueueRequest(-1);
+        CreateQueueRequest notValidBranchId = testFactories.getCreateQueueRequest(-1);
 
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(QUEUES_URL)
                 .accept(MediaType.APPLICATION_JSON)
@@ -57,16 +56,16 @@ class QueueControllerTest extends AbstractContainerBaseTest {
 
     @Test
     void shouldReturn409_WhenQueueAlreadyExists() throws Exception {
-        Company company = TestFactories.getRandomCompany();
+        Company company = testFactories.getRandomCompany();
         Company createdCompany = companyService.create(company);
 
-        Branch branch = TestFactories.getRandomBranch(createdCompany.getId());
+        Branch branch = testFactories.getRandomBranch(createdCompany.getId());
         Branch createdBranch = branchService.create(branch);
 
-        Queue queue = TestFactories.getRandomQueue(createdBranch.getId());
+        Queue queue = testFactories.getRandomQueue(createdBranch.getId());
         repository.save(queue);
 
-        CreateQueueRequest duplicatedQueueRequest = TestFactories.getCreateQueueRequest(queue);
+        CreateQueueRequest duplicatedQueueRequest = testFactories.getCreateQueueRequest(queue);
 
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(QUEUES_URL)
                 .accept(MediaType.APPLICATION_JSON)
@@ -84,7 +83,7 @@ class QueueControllerTest extends AbstractContainerBaseTest {
     @Test
     void shouldReturn404_WhenParentBranchDoesNotExist() throws Exception {
         long nonExistentBranchId = 123;
-        CreateQueueRequest nonExistentBranchRequest = TestFactories.getCreateQueueRequest(nonExistentBranchId);
+        CreateQueueRequest nonExistentBranchRequest = testFactories.getCreateQueueRequest(nonExistentBranchId);
 
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(QUEUES_URL)
                 .accept(MediaType.APPLICATION_JSON)
@@ -101,13 +100,13 @@ class QueueControllerTest extends AbstractContainerBaseTest {
 
     @Test
     void shouldReturn201_WhenGivenAValidRequest() throws Exception {
-        Company company = TestFactories.getRandomCompany();
+        Company company = testFactories.getRandomCompany();
         Company createdCompany = companyService.create(company);
 
-        Branch branch = TestFactories.getRandomBranch(createdCompany.getId());
+        Branch branch = testFactories.getRandomBranch(createdCompany.getId());
         Branch createdBranch = branchService.create(branch);
 
-        CreateQueueRequest createQueueRequest = TestFactories.getCreateQueueRequest(createdBranch.getId());
+        CreateQueueRequest createQueueRequest = testFactories.getCreateQueueRequest(createdBranch.getId());
         LocalDateTime currentDate = LocalDateTime.now();
 
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(QUEUES_URL)

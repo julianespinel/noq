@@ -15,10 +15,13 @@ public record TurnNumber(char letter, int number) {
 
     public static boolean isValid(String initialTurn) {
         boolean lengthIsAtLeastTwo = initialTurn.length() >= 2;
+        if (!lengthIsAtLeastTwo) {
+            return false;
+        }
+
         boolean firstIsLetter = Character.isLetter(initialTurn.charAt(0));
         boolean secondIsDigit = Character.isDigit(initialTurn.charAt(1));
-
-        return lengthIsAtLeastTwo && firstIsLetter && secondIsDigit;
+        return firstIsLetter && secondIsDigit;
     }
 
     @Override

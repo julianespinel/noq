@@ -14,8 +14,8 @@
 ### States
 
 ~~1. Requested: Take a turn, ex: add phone number to queue (enqueue)~~
-1. Cancelled: Cancel turn, ex: remove user from queue: (cancel -> dequeue)
-1. Ready: Notify turn is ready, ex: call user to come to be served, notify him/her (notify)
+~~1. Cancelled: Cancel turn, ex: remove user from queue: (cancel -> dequeue)~~
+~~1. Ready: Notify turn is ready, ex: call user to come to be served, notify him/her (notify)~~
 1. Started: Turn starts, ex: the user arrived to the branch (dequeue)
 1. Ended: Turn ends, ex: the user left the branch after he/she was served (done)
 

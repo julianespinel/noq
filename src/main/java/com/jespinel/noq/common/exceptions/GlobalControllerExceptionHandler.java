@@ -33,4 +33,18 @@ public class GlobalControllerExceptionHandler extends ResponseEntityExceptionHan
         ApiError apiError = new ApiError(exception.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiError);
     }
+
+    @ExceptionHandler(EmptyQueueException.class)
+    public ResponseEntity<ApiError> handleValidationErrors(EmptyQueueException exception) {
+        logger.error(exception.getMessage(), exception);
+        ApiError apiError = new ApiError(exception.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(apiError);
+    }
+
+    @ExceptionHandler(TurnStateTransitionException.class)
+    public ResponseEntity<ApiError> handleValidationErrors(TurnStateTransitionException exception) {
+        logger.error(exception.getMessage(), exception);
+        ApiError apiError = new ApiError(exception.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(apiError);
+    }
 }

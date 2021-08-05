@@ -17,8 +17,11 @@ public class TurnRowMapper implements RowMapper<Turn> {
         String turnNumberString = rs.getString("turn_number");
         TurnNumber turnNumber = TurnNumber.from(turnNumberString);
 
+        String currentStateStr = rs.getString("current_state");
+        TurnStateValue currentState = TurnStateValue.valueOf(currentStateStr);
+
         LocalDateTime createdAt = rs.getTimestamp("created_at").toLocalDateTime();
         LocalDateTime updatedAt = rs.getTimestamp("updated_at").toLocalDateTime();
-        return new Turn(id, phoneNumber, queueId, turnNumber, createdAt, updatedAt);
+        return new Turn(id, phoneNumber, queueId, turnNumber, currentState, createdAt, updatedAt);
     }
 }

@@ -1,7 +1,6 @@
 package com.jespinel.noq.branches;
 
 import com.jespinel.noq.AbstractContainerBaseTest;
-import com.jespinel.noq.TestFactories;
 import com.jespinel.noq.common.exceptions.ApiError;
 import com.jespinel.noq.companies.Company;
 import com.jespinel.noq.companies.CompanyService;
@@ -37,7 +36,7 @@ class BranchControllerTest extends AbstractContainerBaseTest {
     @Test
     void shouldReturn400_WhenRequestIsNotValid() throws Exception {
         // given
-        CreateBranchRequest notValidParentId = TestFactories.getCreateBranchRequest(-1);
+        CreateBranchRequest notValidParentId = testFactories.getCreateBranchRequest(-1);
 
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(BRANCHES_URL)
                 .accept(MediaType.APPLICATION_JSON)
@@ -53,13 +52,13 @@ class BranchControllerTest extends AbstractContainerBaseTest {
 
     @Test
     void shouldReturn409_WhenBranchAlreadyExists() throws Exception {
-        Company company = TestFactories.getRandomCompany();
+        Company company = testFactories.getRandomCompany();
         Company createdCompany = companyService.create(company);
 
-        Branch branch = TestFactories.getRandomBranch(createdCompany.getId());
+        Branch branch = testFactories.getRandomBranch(createdCompany.getId());
         repository.save(branch);
 
-        CreateBranchRequest duplicatedBranchRequest = TestFactories.getCreateBranchRequest(branch);
+        CreateBranchRequest duplicatedBranchRequest = testFactories.getCreateBranchRequest(branch);
 
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(BRANCHES_URL)
                 .accept(MediaType.APPLICATION_JSON)
@@ -77,7 +76,7 @@ class BranchControllerTest extends AbstractContainerBaseTest {
     @Test
     void shouldReturn404_WhenParentCompanyDoesNotExist() throws Exception {
         long nonExistentCompanyId = 123;
-        CreateBranchRequest nonExistentCompanyRequest = TestFactories.getCreateBranchRequest(nonExistentCompanyId);
+        CreateBranchRequest nonExistentCompanyRequest = testFactories.getCreateBranchRequest(nonExistentCompanyId);
 
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(BRANCHES_URL)
                 .accept(MediaType.APPLICATION_JSON)
@@ -94,9 +93,9 @@ class BranchControllerTest extends AbstractContainerBaseTest {
 
     @Test
     void shouldReturn201_WhenGivenAValidRequest() throws Exception {
-        Company company = TestFactories.getRandomCompany();
+        Company company = testFactories.getRandomCompany();
         Company createdCompany = companyService.create(company);
-        CreateBranchRequest createBranchRequest = TestFactories.getCreateBranchRequest(createdCompany.getId());
+        CreateBranchRequest createBranchRequest = testFactories.getCreateBranchRequest(createdCompany.getId());
         LocalDateTime currentDate = LocalDateTime.now();
 
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(BRANCHES_URL)

@@ -39,12 +39,13 @@ CREATE TABLE queues
 --changeset julianespinel:4
 CREATE TABLE turns
 (
-    id           SERIAL PRIMARY KEY,
-    turn_number  VARCHAR(128) NOT NULL,
-    phone_number VARCHAR(128) NOT NULL,
-    queue_id     INTEGER REFERENCES queues (id),
-    created_at   TIMESTAMP    NOT NULL,
-    updated_at   TIMESTAMP    NOT NULL,
+    id            SERIAL PRIMARY KEY,
+    turn_number   VARCHAR(128) NOT NULL,
+    phone_number  VARCHAR(128) NOT NULL,
+    current_state VARCHAR(128) NOT NULL,
+    queue_id      INTEGER REFERENCES queues (id),
+    created_at    TIMESTAMP    NOT NULL,
+    updated_at    TIMESTAMP    NOT NULL,
 
     UNIQUE (turn_number, phone_number, queue_id)
 );
