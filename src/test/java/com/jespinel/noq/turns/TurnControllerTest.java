@@ -182,6 +182,11 @@ class TurnControllerTest extends AbstractContainerBaseTest {
         assertThat(turn.getTurnNumber().toString()).isEqualTo("A1");
         assertThat(turn.getQueueId()).isEqualTo(queueId);
         assertThat(turn.getCurrentState()).isEqualTo(TurnStateValue.REQUESTED);
+
+        Optional<TurnState> optional = turnStateRepository.findLatestStateByTurnId(turn.getId());
+        assertThat(optional).isPresent();
+        TurnState turnState = optional.get();
+        assertThat(turnState.getState()).isEqualTo(TurnStateValue.REQUESTED);
     }
 
     @Test
@@ -304,6 +309,11 @@ class TurnControllerTest extends AbstractContainerBaseTest {
         assertThat(turn.getTurnNumber().toString()).isEqualTo(existentTurn.getTurnNumber().toString());
         assertThat(turn.getQueueId()).isEqualTo(queue.getId());
         assertThat(turn.getCurrentState()).isEqualTo(TurnStateValue.CANCELLED);
+
+        Optional<TurnState> optional = turnStateRepository.findLatestStateByTurnId(turn.getId());
+        assertThat(optional).isPresent();
+        TurnState turnState = optional.get();
+        assertThat(turnState.getState()).isEqualTo(TurnStateValue.CANCELLED);
     }
 
     @Test
@@ -461,5 +471,10 @@ class TurnControllerTest extends AbstractContainerBaseTest {
         assertThat(turn.getTurnNumber().toString()).isEqualTo(firstRequestedTurn.getTurnNumber().toString());
         assertThat(turn.getQueueId()).isEqualTo(queueId);
         assertThat(turn.getCurrentState()).isEqualTo(TurnStateValue.READY);
+
+        Optional<TurnState> optional = turnStateRepository.findLatestStateByTurnId(turn.getId());
+        assertThat(optional).isPresent();
+        TurnState turnState = optional.get();
+        assertThat(turnState.getState()).isEqualTo(TurnStateValue.READY);
     }
 }
