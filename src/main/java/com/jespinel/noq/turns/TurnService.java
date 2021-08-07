@@ -154,11 +154,20 @@ public class TurnService {
         return turn.get();
     }
 
+    /**
+     * Move a turn from its current state to the given target state.
+     * If the state transition is valid returns the turn, otherwise it throws
+     * an exception.
+     *
+     * @param turnId The ID of the turn we want to change its state
+     * @param targetState The new state we want to set in the turn
+     * @return If the transition was possible returns the turn, otherwise throws an exception
+     */
     public Turn updateTurn(long turnId, TurnStateValue targetState) {
         Turn turn = getOrThrow(turnId);
         return switch (targetState) {
-            case STARTED -> startTurn(turn, targetState);
-            case ENDED -> endTurn(turn, targetState);
+            case STARTED -> startTurn(turn);
+            case ENDED -> endTurn(turn);
             default -> {
                 String errorMessage = "The given target state %s is not valid"
                         .formatted(targetState);
@@ -167,11 +176,11 @@ public class TurnService {
         };
     }
 
-    private Turn startTurn(Turn turn, TurnStateValue targetState) {
+    private Turn startTurn(Turn turn) {
         return transactionTemplate.execute(updateTurnCurrentState(turn.getId(), STARTED));
     }
 
-    private Turn endTurn(Turn turn, TurnStateValue targetState) {
-        throw new IllegalStateException("Not implemented yet");
+    private Turn endTurn(Turn turn) {
+        return transactionTemplate.execute(updateTurnCurrentState(turn.getId(), ENDED));
     }
 }
