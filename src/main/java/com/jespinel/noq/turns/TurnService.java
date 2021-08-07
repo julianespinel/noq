@@ -166,8 +166,8 @@ public class TurnService {
     public Turn updateTurn(long turnId, TurnStateValue targetState) {
         Turn turn = getOrThrow(turnId);
         return switch (targetState) {
-            case STARTED -> startTurn(turn, targetState);
-            case ENDED -> endTurn(turn, targetState);
+            case STARTED -> startTurn(turn);
+            case ENDED -> endTurn(turn);
             default -> {
                 String errorMessage = "The given target state %s is not valid"
                         .formatted(targetState);
@@ -176,11 +176,11 @@ public class TurnService {
         };
     }
 
-    private Turn startTurn(Turn turn, TurnStateValue targetState) {
+    private Turn startTurn(Turn turn) {
         return transactionTemplate.execute(updateTurnCurrentState(turn.getId(), STARTED));
     }
 
-    private Turn endTurn(Turn turn, TurnStateValue targetState) {
-        throw new IllegalStateException("Not implemented yet");
+    private Turn endTurn(Turn turn) {
+        return transactionTemplate.execute(updateTurnCurrentState(turn.getId(), ENDED));
     }
 }
