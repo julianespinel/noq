@@ -44,6 +44,13 @@ public class TurnController {
         return ResponseEntity.status(HttpStatus.OK).body(turn);
     }
 
+    /**
+     * Endpoint used to transition a turn from one state to another.
+     *
+     * @param turnId The ID of the turn we want to update
+     * @param request Request containing the new target state of the turn
+     * @return Response entity
+     */
     @PutMapping("/{turnId}")
     public ResponseEntity<Turn> update(@PathVariable long turnId, @RequestBody UpdateTurnRequest request) {
         request.validateOrThrow();

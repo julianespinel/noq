@@ -154,6 +154,15 @@ public class TurnService {
         return turn.get();
     }
 
+    /**
+     * Move a turn from its current state to the given target state.
+     * If the state transition is valid returns the turn, otherwise it throws
+     * an exception.
+     *
+     * @param turnId The ID of the turn we want to change its state
+     * @param targetState The new state we want to set in the turn
+     * @return If the transition was possible returns the turn, otherwise throws an exception
+     */
     public Turn updateTurn(long turnId, TurnStateValue targetState) {
         Turn turn = getOrThrow(turnId);
         return switch (targetState) {
