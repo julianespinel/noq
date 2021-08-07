@@ -15,6 +15,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.Optional;
 
+import static com.jespinel.noq.turns.TurnStateValue.*;
+
 
 @Service
 public class TurnService {
@@ -77,7 +79,7 @@ public class TurnService {
 
     private Turn generateNextTurn(String phoneNumber, Queue queue) {
         TurnNumber nextTurnNumber = turnNumberService.getNextTurn(queue);
-        return new Turn(phoneNumber, queue.getId(), nextTurnNumber, TurnStateValue.REQUESTED);
+        return new Turn(phoneNumber, queue.getId(), nextTurnNumber, REQUESTED);
     }
 
     public Optional<Turn> getPhoneNumberLatestTurn(String phoneNumber) {
@@ -104,11 +106,11 @@ public class TurnService {
 
         // Cancel turn
         Turn turn = phoneNumberTurn.get();
-        Turn updatedTurn = transactionTemplate.execute(updateTurnCurrentState(turn.getId(), TurnStateValue.CANCELLED));
+        Turn updatedTurn = transactionTemplate.execute(updateTurnCurrentState(turn.getId(), CANCELLED));
         notificationService.notifyCancellation(turn);
 
         // If the cancelled turn was in READY state, call the next turn
-        if (turn.getCurrentState().equals(TurnStateValue.READY)) {
+        if (turn.getCurrentState().equals(READY)) {
             callNextTurn(turn.getQueueId());
         }
 
@@ -138,7 +140,7 @@ public class TurnService {
         }
 
         Turn nextTurn = optionalTurn.get();
-        Turn updatedTurn = transactionTemplate.execute(updateTurnCurrentState(nextTurn.getId(), TurnStateValue.READY));
+        Turn updatedTurn = transactionTemplate.execute(updateTurnCurrentState(nextTurn.getId(), READY));
         notificationService.notifyReadiness(updatedTurn);
         return updatedTurn;
     }
@@ -150,5 +152,26 @@ public class TurnService {
             throw new EntityNotFoundException(errorMessage);
         });
         return turn.get();
+    }
+
+    public Turn updateTurn(long turnId, TurnStateValue targetState) {
+        Turn turn = getOrThrow(turnId);
+        return switch (targetState) {
+            case STARTED -> startTurn(turn, targetState);
+            case ENDED -> endTurn(turn, targetState);
+            default -> {
+                String errorMessage = "The given target state %s is not valid"
+                        .formatted(targetState);
+                throw new IllegalStateException(errorMessage);
+            }
+        };
+    }
+
+    private Turn startTurn(Turn turn, TurnStateValue targetState) {
+        return transactionTemplate.execute(updateTurnCurrentState(turn.getId(), STARTED));
+    }
+
+    private Turn endTurn(Turn turn, TurnStateValue targetState) {
+        throw new IllegalStateException("Not implemented yet");
     }
 }

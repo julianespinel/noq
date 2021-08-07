@@ -182,6 +182,11 @@ class TurnControllerTest extends AbstractContainerBaseTest {
         assertThat(turn.getTurnNumber().toString()).isEqualTo("A1");
         assertThat(turn.getQueueId()).isEqualTo(queueId);
         assertThat(turn.getCurrentState()).isEqualTo(TurnStateValue.REQUESTED);
+
+        Optional<TurnState> optional = turnStateRepository.findLatestStateByTurnId(turn.getId());
+        assertThat(optional).isPresent();
+        TurnState turnState = optional.get();
+        assertThat(turnState.getState()).isEqualTo(TurnStateValue.REQUESTED);
     }
 
     @Test
@@ -304,6 +309,11 @@ class TurnControllerTest extends AbstractContainerBaseTest {
         assertThat(turn.getTurnNumber().toString()).isEqualTo(existentTurn.getTurnNumber().toString());
         assertThat(turn.getQueueId()).isEqualTo(queue.getId());
         assertThat(turn.getCurrentState()).isEqualTo(TurnStateValue.CANCELLED);
+
+        Optional<TurnState> optional = turnStateRepository.findLatestStateByTurnId(turn.getId());
+        assertThat(optional).isPresent();
+        TurnState turnState = optional.get();
+        assertThat(turnState.getState()).isEqualTo(TurnStateValue.CANCELLED);
     }
 
     @Test
@@ -461,5 +471,97 @@ class TurnControllerTest extends AbstractContainerBaseTest {
         assertThat(turn.getTurnNumber().toString()).isEqualTo(firstRequestedTurn.getTurnNumber().toString());
         assertThat(turn.getQueueId()).isEqualTo(queueId);
         assertThat(turn.getCurrentState()).isEqualTo(TurnStateValue.READY);
+
+        Optional<TurnState> optional = turnStateRepository.findLatestStateByTurnId(turn.getId());
+        assertThat(optional).isPresent();
+        TurnState turnState = optional.get();
+        assertThat(turnState.getState()).isEqualTo(TurnStateValue.READY);
+    }
+
+    //--------------------------------------------------------------------------
+    // Start turn
+    //--------------------------------------------------------------------------
+
+    @Test
+    void startTurn_shouldReturn400_whenTheGivenRequestIsNotValid() throws Exception {
+        // given
+        String unknownState = "unknown";
+        UpdateTurnRequest updateTurnRequest = new UpdateTurnRequest(unknownState);
+        String url = TURNS_URL + "/" + 1;
+
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.put(url)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateTurnRequest));
+        // when
+        MockHttpServletResponse response = mockMvc.perform(request).andReturn().getResponse();
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+
+        ApiError apiError = objectMapper.readValue(response.getContentAsString(), ApiError.class);
+        assertThat(apiError.error()).isEqualTo("The given target state is not valid");
+    }
+
+    @Test
+    void startTurn_shouldReturn409_whenTheTurnIsNotInReadyState() throws Exception {
+        // given
+        Queue queue = testFactories.createTestQueueInDB();
+        long queueId = queue.getId();
+
+        String phoneNumberOne = "+573002930001";
+        Turn requestedTurn = turnService.create(phoneNumberOne, queueId);
+        // Turn in requested state ^
+
+        UpdateTurnRequest updateTurnRequest = new UpdateTurnRequest(TurnStateValue.STARTED.toString());
+        String url = TURNS_URL + "/" + requestedTurn.getId();
+
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.put(url)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateTurnRequest));
+        // when
+        MockHttpServletResponse response = mockMvc.perform(request).andReturn().getResponse();
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.CONFLICT.value());
+
+        ApiError apiError = objectMapper.readValue(response.getContentAsString(), ApiError.class);
+        String errorMessage = "Turn %s can't transition from %s to %s"
+                .formatted(requestedTurn.getId(), TurnStateValue.REQUESTED, TurnStateValue.STARTED);
+        assertThat(apiError.error()).isEqualTo(errorMessage);
+    }
+
+    @Test
+    void startTurn_shouldReturn200_whenTheGivenTurnIsInReadyState() throws Exception {
+        // given
+        Queue queue = testFactories.createTestQueueInDB();
+        long queueId = queue.getId();
+
+        String phoneNumberOne = "+573002930001";
+        turnService.create(phoneNumberOne, queueId);
+        Turn readyTurn = turnService.callNextTurn(queueId);
+
+        UpdateTurnRequest updateTurnRequest = new UpdateTurnRequest(TurnStateValue.STARTED.toString());
+        String url = TURNS_URL + "/" + readyTurn.getId();
+
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.put(url)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateTurnRequest));
+        // when
+        MockHttpServletResponse response = mockMvc.perform(request).andReturn().getResponse();
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+
+        Turn turn = objectMapper.readValue(response.getContentAsString(), Turn.class);
+        assertThat(turn.getId()).isEqualTo(readyTurn.getId());
+        assertThat(turn.getPhoneNumber()).isEqualTo(phoneNumberOne);
+        assertThat(turn.getTurnNumber().toString()).isEqualTo(readyTurn.getTurnNumber().toString());
+        assertThat(turn.getQueueId()).isEqualTo(queueId);
+        assertThat(turn.getCurrentState()).isEqualTo(TurnStateValue.STARTED);
+
+        Optional<TurnState> optional = turnStateRepository.findLatestStateByTurnId(readyTurn.getId());
+        assertThat(optional).isPresent();
+        TurnState turnState = optional.get();
+        assertThat(turnState.getState()).isEqualTo(TurnStateValue.STARTED);
     }
 }
