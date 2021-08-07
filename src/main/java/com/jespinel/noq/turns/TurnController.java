@@ -43,4 +43,12 @@ public class TurnController {
         Turn turn = service.callNextTurn(request.queueId());
         return ResponseEntity.status(HttpStatus.OK).body(turn);
     }
+
+    @PutMapping("/{turnId}")
+    public ResponseEntity<Turn> update(@PathVariable long turnId, @RequestBody UpdateTurnRequest request) {
+        request.validateOrThrow();
+        TurnStateValue targetState = TurnStateValue.valueOf(request.targetState());
+        Turn turn = service.updateTurn(turnId, targetState);
+        return ResponseEntity.status(HttpStatus.OK).body(turn);
+    }
 }
