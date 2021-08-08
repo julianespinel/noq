@@ -7,7 +7,7 @@
 ## Branch
 
 ~~1. Add branch to company, ex: Bank A at 33rd street~~
-~~1. Add queue to branch, ex: Bank A at 33th street, payments queue~~
+~~1. Add queue to branch, ex: Bank A at 33rd street, payments queue~~
 
 ## Turn
 
@@ -21,10 +21,10 @@
 
 ## Reports
 
-### Branches table (per branch)
+### General report per queue and date range
 
-1. Show the average waiting time (from take turn to notify turn is ready) on the current day
-1. Show the canceled turns on the current day
-1. Show the average time between (notify turn is ready and turn starts) on the current day
-1. Show the average turn execution time (from turn starts to turn ends) on the current day
-1. Show the users served on the current day
+~~1. Show the average waiting time (from take turn to notify when turn is ready) on the current day~~
+~~1. Show the canceled turns on the current day~~
+~~1. Show the average time to wait for the customer (from turn ready to turn starts) on the current day~~
+~~1. Show the average turn execution time (from turn starts to turn ends) on the current day~~
+~~1. Show the users served (amount of turns ended) on the current day~~

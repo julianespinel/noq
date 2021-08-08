@@ -39,9 +39,8 @@ class TurnServiceTest extends AbstractContainerBaseTest {
         String phoneNumber = "+573002930008";
 
         // This will make the creation transaction fail.
-        int turnId = 1;
         RuntimeException mockedException = new RuntimeException("Mocked exception from test");
-        Mockito.when(turnStateServiceMock.create(turnId)).thenThrow(mockedException);
+        Mockito.when(turnStateServiceMock.create(Mockito.anyLong())).thenThrow(mockedException);
 
         // when
         assertThrows(RuntimeException.class, () -> {
