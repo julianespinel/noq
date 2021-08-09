@@ -25,7 +25,7 @@ public class TurnController {
     public ResponseEntity<Turn> create(@RequestBody CreateTurnRequest request) {
         request.validateOrThrow();
         Turn turn = service.create(request.phoneNumber(), request.queueId());
-        logger.debug("The turn %s was created in the queue %s".formatted(turn.getTurnNumber(), turn.getQueueId()));
+        logger.debug("The turn %s was created in queue %s".formatted(turn.getTurnNumber(), turn.getQueueId()));
         return ResponseEntity.status(HttpStatus.CREATED).body(turn);
     }
 
@@ -33,7 +33,7 @@ public class TurnController {
     public ResponseEntity<Turn> cancel(@RequestBody CancelTurnRequest request) {
         request.validateOrThrow();
         Turn turn = service.cancel(request.phoneNumber());
-        logger.debug("The turn %s was cancelled in the queue %s".formatted(turn.getTurnNumber(), turn.getQueueId()));
+        logger.debug("The turn %s was cancelled in queue %s".formatted(turn.getTurnNumber(), turn.getQueueId()));
         return ResponseEntity.status(HttpStatus.OK).body(turn);
     }
 
@@ -41,6 +41,7 @@ public class TurnController {
     public ResponseEntity<Turn> callNextTurn(@RequestBody CallNextTurnRequest request) {
         request.validateOrThrow();
         Turn turn = service.callNextTurn(request.queueId());
+        logger.debug("The turn %s was called from queue %s".formatted(turn.getTurnNumber(), turn.getQueueId()));
         return ResponseEntity.status(HttpStatus.OK).body(turn);
     }
 
@@ -56,6 +57,7 @@ public class TurnController {
         request.validateOrThrow();
         TurnStateValue targetState = TurnStateValue.valueOf(request.targetState());
         Turn turn = service.updateTurn(turnId, targetState);
+        logger.debug("The turn %s was moved to state %s".formatted(turn.getTurnNumber(), turn.getCurrentState()));
         return ResponseEntity.status(HttpStatus.OK).body(turn);
     }
 }

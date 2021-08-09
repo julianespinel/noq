@@ -9,6 +9,6 @@ public class TestSmsNotifier implements ISmsNotifier {
 
     @Override
     public void send(String phoneNumber, String message) {
-        logger.debug("TEST: Message sent to %s".formatted(phoneNumber));
+        logger.debug("TEST: Message sent to %s: %s".formatted(phoneNumber, message));
     }
 }

@@ -17,22 +17,18 @@ public class NotificationService {
     public void notifyTurnCreation(Turn turn) {
         String turnRequestedTemplate = "Your turn has been requested, you got turn %s";
         String message = turnRequestedTemplate.formatted(turn.getTurnNumber());
-        smsNotifier.send(message, turn.getPhoneNumber());
+        smsNotifier.send(turn.getPhoneNumber(), message);
     }
 
     public void notifyCancellation(Turn turn) {
         String turnRequestedTemplate = "The turn %s has been cancelled";
         String message = turnRequestedTemplate.formatted(turn.getTurnNumber());
-        smsNotifier.send(message, turn.getPhoneNumber());
-    }
-
-    public void notifyError(String errorMessage, String phoneNumber) {
-        smsNotifier.send(errorMessage, phoneNumber);
+        smsNotifier.send(turn.getPhoneNumber(), message);
     }
 
     public void notifyReadiness(Turn turn) {
         String turnReadyTemplate = "The turn %s is ready";
         String message = turnReadyTemplate.formatted(turn.getTurnNumber());
-        smsNotifier.send(message, turn.getPhoneNumber());
+        smsNotifier.send(turn.getPhoneNumber(), message);
     }
 }
