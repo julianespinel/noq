@@ -7,13 +7,18 @@ import java.time.LocalDateTime;
 public class Company {
 
     private long id;
-    private final String nit;
+
+    /**
+     * Taxpayer Identification Number
+     */
+    private final String tin;
+
     private final String name;
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
 
-    public Company(String nit, String name) {
-        this.nit = nit;
+    public Company(String tin, String name) {
+        this.tin = tin;
         this.name = name;
 
         LocalDateTime now = LocalDateTime.now();
@@ -23,16 +28,16 @@ public class Company {
 
     public Company(long id, Company company) {
         this.id = id;
-        nit = company.nit;
+        tin = company.tin;
         name = company.name;
         createdAt = company.createdAt;
         updatedAt = company.updatedAt;
     }
 
     @JsonCreator
-    public Company(long id, String nit, String name, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public Company(long id, String tin, String name, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
-        this.nit = nit;
+        this.tin = tin;
         this.name = name;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -42,8 +47,8 @@ public class Company {
         return id;
     }
 
-    public String getNit() {
-        return nit;
+    public String getTin() {
+        return tin;
     }
 
     public String getName() {

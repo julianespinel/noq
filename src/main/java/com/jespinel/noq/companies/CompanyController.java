@@ -27,7 +27,7 @@ public class CompanyController {
     public ResponseEntity<Company> create(@RequestBody CreateCompanyRequest request) {
         request.validateOrThrow();
         Company company = service.create(request.toCompany());
-        logger.debug("The company %s %s was created".formatted(request.nit(), request.name()));
+        logger.debug("The company %s %s was created".formatted(request.tin(), request.name()));
         return ResponseEntity.status(HttpStatus.CREATED).body(company);
     }
 }

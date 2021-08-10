@@ -22,7 +22,7 @@ public class CompanyService {
         try {
             return repository.save(company);
         } catch (DuplicateKeyException e) {
-            String errorMessage = "A company with nit %s already exists".formatted(company.getNit());
+            String errorMessage = "A company with tin %s already exists".formatted(company.getTin());
             throw new DuplicatedEntityException(errorMessage);
         }
     }
