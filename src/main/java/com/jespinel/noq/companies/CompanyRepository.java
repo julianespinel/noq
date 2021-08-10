@@ -16,8 +16,8 @@ import java.util.Optional;
 class CompanyRepository {
 
     private static final String CREATE_COMPANY_SQL =
-            "INSERT INTO companies (nit, name, created_at, updated_at) " +
-                    "VALUES (:nit, :name, :created_at, :updated_at)";
+            "INSERT INTO companies (tin, name, created_at, updated_at) " +
+                    "VALUES (:tin, :name, :created_at, :updated_at)";
 
     private static final String FIND_COMPANY_SQL =
             "SELECT * FROM companies WHERE id = :id";
@@ -33,7 +33,7 @@ class CompanyRepository {
 
     Company save(Company company) {
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("nit", company.getNit())
+                .addValue("tin", company.getTin())
                 .addValue("name", company.getName())
                 .addValue("created_at", company.getCreatedAt())
                 .addValue("updated_at", company.getUpdatedAt());

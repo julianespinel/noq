@@ -31,9 +31,9 @@ public class TestFactories {
     }
 
     public Company getRandomCompany() {
-        String nit = faker.idNumber().valid();
+        String tin = faker.idNumber().valid();
         String name = faker.name().name();
-        return new Company(nit, name);
+        return new Company(tin, name);
     }
 
     public Branch getRandomBranch(long companyId) {

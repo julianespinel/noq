@@ -40,14 +40,14 @@ class CompanyControllerTest extends AbstractContainerBaseTest {
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
         ApiError apiError = objectMapper.readValue(response.getContentAsString(), ApiError.class);
-        assertThat(apiError.error()).isEqualTo("The given nit was null or empty");
+        assertThat(apiError.error()).isEqualTo("The given tin was null or empty");
     }
 
     @Test
     void shouldReturn409_WhenCompanyWithSameNitIsAlreadyCreated() throws Exception {
         // given
         Company company = createRandomCompanyInDB();
-        CreateCompanyRequest duplicatedCompany = new CreateCompanyRequest(company.getNit(), company.getName());
+        CreateCompanyRequest duplicatedCompany = new CreateCompanyRequest(company.getTin(), company.getName());
 
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(COMPANIES_URL)
                 .accept(MediaType.APPLICATION_JSON)
@@ -58,14 +58,14 @@ class CompanyControllerTest extends AbstractContainerBaseTest {
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.CONFLICT.value());
         ApiError apiError = objectMapper.readValue(response.getContentAsString(), ApiError.class);
-        String errorMessage = "A company with nit %s already exists".formatted(company.getNit());
+        String errorMessage = "A company with tin %s already exists".formatted(company.getTin());
         assertThat(apiError.error()).isEqualTo(errorMessage);
     }
 
     @Test
     void shouldReturn201_WhenRequestIsValid() throws Exception {
         Company company = testFactories.getRandomCompany();
-        CreateCompanyRequest newCompany = new CreateCompanyRequest(company.getNit(), company.getName());
+        CreateCompanyRequest newCompany = new CreateCompanyRequest(company.getTin(), company.getName());
 
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(COMPANIES_URL)
                 .accept(MediaType.APPLICATION_JSON)
@@ -78,7 +78,7 @@ class CompanyControllerTest extends AbstractContainerBaseTest {
 
         Company createdCompany = objectMapper.readValue(response.getContentAsString(), Company.class);
         assertThat(createdCompany.getId()).isGreaterThan(0);
-        assertThat(createdCompany.getNit()).isEqualTo(company.getNit());
+        assertThat(createdCompany.getTin()).isEqualTo(company.getTin());
         assertThat(createdCompany.getName()).isEqualTo(company.getName());
         assertThat(createdCompany.getCreatedAt()).isAfterOrEqualTo(company.getCreatedAt());
         assertThat(createdCompany.getUpdatedAt()).isAfterOrEqualTo(company.getUpdatedAt());
