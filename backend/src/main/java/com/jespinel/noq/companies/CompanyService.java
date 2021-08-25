@@ -22,7 +22,7 @@ public class CompanyService {
         try {
             return repository.save(company);
         } catch (DuplicateKeyException e) {
-            String errorMessage = "A company with tin %s already exists".formatted(company.getTin());
+            String errorMessage = "A company with TIN %s already exists".formatted(company.getTin());
             throw new DuplicatedEntityException(errorMessage);
         }
     }
@@ -30,7 +30,7 @@ public class CompanyService {
     public Company getOrThrow(long companyId) {
         Optional<Company> company = repository.find(companyId);
         company.orElseThrow(() -> {
-            String errorMessage = "The company with ID %s was not found".formatted(companyId);
+            String errorMessage = "The company with TIN %s was not found".formatted(companyId);
             throw new EntityNotFoundException(errorMessage);
         });
         return company.get();

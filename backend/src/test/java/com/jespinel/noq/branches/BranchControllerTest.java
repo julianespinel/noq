@@ -87,7 +87,7 @@ class BranchControllerTest extends AbstractContainerBaseTest {
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
         ApiError apiError = objectMapper.readValue(response.getContentAsString(), ApiError.class);
-        String errorMessage = "The company with ID %s was not found".formatted(nonExistentCompanyId);
+        String errorMessage = "The company with TIN %s was not found".formatted(nonExistentCompanyId);
         assertThat(apiError.error()).isEqualTo(errorMessage);
     }
 

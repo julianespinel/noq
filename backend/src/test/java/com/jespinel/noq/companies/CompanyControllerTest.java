@@ -58,7 +58,7 @@ class CompanyControllerTest extends AbstractContainerBaseTest {
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.CONFLICT.value());
         ApiError apiError = objectMapper.readValue(response.getContentAsString(), ApiError.class);
-        String errorMessage = "A company with tin %s already exists".formatted(company.getTin());
+        String errorMessage = "A company with TIN %s already exists".formatted(company.getTin());
         assertThat(apiError.error()).isEqualTo(errorMessage);
     }
 
