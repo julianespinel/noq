@@ -88,16 +88,16 @@ class TurnControllerTest extends AbstractContainerBaseTest {
         ExecutorService pool = Executors.newFixedThreadPool(concurrent);
 
         for (int repetition = 0; repetition < repetitions; repetition++) {
-            List<Future<TurnNumber>> turnNumbers = createTurnsConcurrently(concurrent, pool);
+            List<Future<String>> turnNumbers = createTurnsConcurrently(concurrent, pool);
             checkThereAreNoDuplicatedTurns(turnNumbers);
         }
     }
 
-    private void checkThereAreNoDuplicatedTurns(List<Future<TurnNumber>> turnNumbers) throws InterruptedException, ExecutionException {
+    private void checkThereAreNoDuplicatedTurns(List<Future<String>> turnNumbers) throws InterruptedException, ExecutionException {
         Map<String, Boolean> existentTurns = new HashMap<>();
 
-        for (Future<TurnNumber> turnNumber : turnNumbers) {
-            String currentTurn = turnNumber.get().toString();
+        for (Future<String> turnNumber : turnNumbers) {
+            String currentTurn = turnNumber.get();
             boolean turnExists = existentTurns.getOrDefault(currentTurn, false);
 
             assertThat(turnExists).isFalse();
@@ -105,8 +105,8 @@ class TurnControllerTest extends AbstractContainerBaseTest {
         }
     }
 
-    private List<Future<TurnNumber>> createTurnsConcurrently(int concurrent, ExecutorService pool) {
-        List<Future<TurnNumber>> turnNumbers = new ArrayList<>();
+    private List<Future<String>> createTurnsConcurrently(int concurrent, ExecutorService pool) {
+        List<Future<String>> turnNumbers = new ArrayList<>();
 
         int limit = 9_999;
         String basePhoneNumber = "+57300293";
@@ -116,7 +116,7 @@ class TurnControllerTest extends AbstractContainerBaseTest {
             String phoneNumber = basePhoneNumber + limit;
             limit--;
             CreateTurnCall parallelTest = new CreateTurnCall(phoneNumber, queue.getId());
-            Future<TurnNumber> turnWasCreated = pool.submit(parallelTest);
+            Future<String> turnWasCreated = pool.submit(parallelTest);
             turnNumbers.add(turnWasCreated);
         }
         return turnNumbers;
@@ -125,7 +125,7 @@ class TurnControllerTest extends AbstractContainerBaseTest {
     /**
      * Create turn in the given queue.
      */
-    private class CreateTurnCall implements Callable<TurnNumber> {
+    private class CreateTurnCall implements Callable<String> {
 
         private final String phoneNumber;
         private final long queueId;
@@ -136,7 +136,7 @@ class TurnControllerTest extends AbstractContainerBaseTest {
         }
 
         @Override
-        public TurnNumber call() throws Exception {
+        public String call() throws Exception {
             // given
             CreateTurnRequest notValidPhoneNumber = testFactories
                     .getCreateTurnRequest(phoneNumber, queueId);
@@ -149,12 +149,12 @@ class TurnControllerTest extends AbstractContainerBaseTest {
             MockHttpServletResponse response = mockMvc.perform(request).andReturn().getResponse();
             // then
             assertThat(response.getStatus()).isEqualTo(HttpStatus.CREATED.value());
-            Turn turn = objectMapper.readValue(response.getContentAsString(), Turn.class);
-            assertThat(turn.getId()).isPositive();
-            assertThat(turn.getPhoneNumber()).isEqualTo(phoneNumber);
-            assertThat(turn.getQueueId()).isEqualTo(queueId);
+            TurnDTO turnDTO = objectMapper.readValue(response.getContentAsString(), TurnDTO.class);
+            assertThat(turnDTO.id()).isPositive();
+            assertThat(turnDTO.phoneNumber()).isEqualTo(phoneNumber);
+            assertThat(turnDTO.queueId()).isEqualTo(queueId);
 
-            return turn.getTurnNumber();
+            return turnDTO.turnNumber();
         }
     }
 
@@ -176,14 +176,14 @@ class TurnControllerTest extends AbstractContainerBaseTest {
         MockHttpServletResponse response = mockMvc.perform(request).andReturn().getResponse();
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.CREATED.value());
-        Turn turn = objectMapper.readValue(response.getContentAsString(), Turn.class);
-        assertThat(turn.getId()).isPositive();
-        assertThat(turn.getPhoneNumber()).isEqualTo(phoneNumber);
-        assertThat(turn.getTurnNumber().toString()).isEqualTo("A1");
-        assertThat(turn.getQueueId()).isEqualTo(queueId);
-        assertThat(turn.getCurrentState()).isEqualTo(TurnStateValue.REQUESTED);
+        TurnDTO turnDTO = objectMapper.readValue(response.getContentAsString(), TurnDTO.class);
+        assertThat(turnDTO.id()).isPositive();
+        assertThat(turnDTO.phoneNumber()).isEqualTo(phoneNumber);
+        assertThat(turnDTO.turnNumber().toString()).isEqualTo("A1");
+        assertThat(turnDTO.queueId()).isEqualTo(queueId);
+        assertThat(turnDTO.currentState()).isEqualTo(TurnStateValue.REQUESTED);
 
-        Optional<TurnState> optional = turnStateRepository.findLatestStateByTurnId(turn.getId());
+        Optional<TurnState> optional = turnStateRepository.findLatestStateByTurnId(turnDTO.id());
         assertThat(optional).isPresent();
         TurnState turnState = optional.get();
         assertThat(turnState.getState()).isEqualTo(TurnStateValue.REQUESTED);
@@ -208,12 +208,12 @@ class TurnControllerTest extends AbstractContainerBaseTest {
         MockHttpServletResponse response = mockMvc.perform(request).andReturn().getResponse();
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.CREATED.value());
-        Turn turn = objectMapper.readValue(response.getContentAsString(), Turn.class);
-        assertThat(turn.getId()).isPositive();
-        assertThat(turn.getPhoneNumber()).isEqualTo(phoneNumber);
-        assertThat(turn.getTurnNumber().toString()).isEqualTo("A101");
-        assertThat(turn.getQueueId()).isEqualTo(queueId);
-        assertThat(turn.getCurrentState()).isEqualTo(TurnStateValue.REQUESTED);
+        TurnDTO turnDTO = objectMapper.readValue(response.getContentAsString(), TurnDTO.class);
+        assertThat(turnDTO.id()).isPositive();
+        assertThat(turnDTO.phoneNumber()).isEqualTo(phoneNumber);
+        assertThat(turnDTO.turnNumber().toString()).isEqualTo("A101");
+        assertThat(turnDTO.queueId()).isEqualTo(queueId);
+        assertThat(turnDTO.currentState()).isEqualTo(TurnStateValue.REQUESTED);
     }
 
     //--------------------------------------------------------------------------
@@ -303,14 +303,14 @@ class TurnControllerTest extends AbstractContainerBaseTest {
         MockHttpServletResponse response = mockMvc.perform(request).andReturn().getResponse();
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
-        Turn turn = objectMapper.readValue(response.getContentAsString(), Turn.class);
-        assertThat(turn.getId()).isEqualTo(existentTurn.getId());
-        assertThat(turn.getPhoneNumber()).isEqualTo(validPhoneNumber);
-        assertThat(turn.getTurnNumber().toString()).isEqualTo(existentTurn.getTurnNumber().toString());
-        assertThat(turn.getQueueId()).isEqualTo(queue.getId());
-        assertThat(turn.getCurrentState()).isEqualTo(TurnStateValue.CANCELLED);
+        TurnDTO turnDTO = objectMapper.readValue(response.getContentAsString(), TurnDTO.class);
+        assertThat(turnDTO.id()).isEqualTo(existentTurn.getId());
+        assertThat(turnDTO.phoneNumber()).isEqualTo(validPhoneNumber);
+        assertThat(turnDTO.turnNumber().toString()).isEqualTo(existentTurn.getTurnNumber().toString());
+        assertThat(turnDTO.queueId()).isEqualTo(queue.getId());
+        assertThat(turnDTO.currentState()).isEqualTo(TurnStateValue.CANCELLED);
 
-        Optional<TurnState> optional = turnStateRepository.findLatestStateByTurnId(turn.getId());
+        Optional<TurnState> optional = turnStateRepository.findLatestStateByTurnId(turnDTO.id());
         assertThat(optional).isPresent();
         TurnState turnState = optional.get();
         assertThat(turnState.getState()).isEqualTo(TurnStateValue.CANCELLED);
@@ -340,12 +340,12 @@ class TurnControllerTest extends AbstractContainerBaseTest {
         // then
         // Check turnOne is cancelled
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
-        Turn turn = objectMapper.readValue(response.getContentAsString(), Turn.class);
-        assertThat(turn.getId()).isEqualTo(turnOne.getId());
-        assertThat(turn.getPhoneNumber()).isEqualTo(phoneNumberOne);
-        assertThat(turn.getTurnNumber().toString()).isEqualTo(turnOne.getTurnNumber().toString());
-        assertThat(turn.getQueueId()).isEqualTo(queue.getId());
-        assertThat(turn.getCurrentState()).isEqualTo(TurnStateValue.CANCELLED);
+        TurnDTO turnDTO = objectMapper.readValue(response.getContentAsString(), TurnDTO.class);
+        assertThat(turnDTO.id()).isEqualTo(turnOne.getId());
+        assertThat(turnDTO.phoneNumber()).isEqualTo(phoneNumberOne);
+        assertThat(turnDTO.turnNumber().toString()).isEqualTo(turnOne.getTurnNumber().toString());
+        assertThat(turnDTO.queueId()).isEqualTo(queue.getId());
+        assertThat(turnDTO.currentState()).isEqualTo(TurnStateValue.CANCELLED);
 
         // Check turnTwo is ready
         // turnTwo should have been called when turnOne (in ready state) was cancelled
@@ -428,12 +428,12 @@ class TurnControllerTest extends AbstractContainerBaseTest {
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
 
-        Turn turn = objectMapper.readValue(response.getContentAsString(), Turn.class);
-        assertThat(turn.getId()).isEqualTo(requestedTurn.getId());
-        assertThat(turn.getPhoneNumber()).isEqualTo(phoneNumberThree);
-        assertThat(turn.getTurnNumber().toString()).isEqualTo(requestedTurn.getTurnNumber().toString());
-        assertThat(turn.getQueueId()).isEqualTo(queueId);
-        assertThat(turn.getCurrentState()).isEqualTo(TurnStateValue.READY);
+        TurnDTO turnDTO = objectMapper.readValue(response.getContentAsString(), TurnDTO.class);
+        assertThat(turnDTO.id()).isEqualTo(requestedTurn.getId());
+        assertThat(turnDTO.phoneNumber()).isEqualTo(phoneNumberThree);
+        assertThat(turnDTO.turnNumber().toString()).isEqualTo(requestedTurn.getTurnNumber().toString());
+        assertThat(turnDTO.queueId()).isEqualTo(queueId);
+        assertThat(turnDTO.currentState()).isEqualTo(TurnStateValue.READY);
     }
 
     @Test
@@ -465,14 +465,14 @@ class TurnControllerTest extends AbstractContainerBaseTest {
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
 
-        Turn turn = objectMapper.readValue(response.getContentAsString(), Turn.class);
-        assertThat(turn.getId()).isEqualTo(firstRequestedTurn.getId());
-        assertThat(turn.getPhoneNumber()).isEqualTo(phoneNumberOne);
-        assertThat(turn.getTurnNumber().toString()).isEqualTo(firstRequestedTurn.getTurnNumber().toString());
-        assertThat(turn.getQueueId()).isEqualTo(queueId);
-        assertThat(turn.getCurrentState()).isEqualTo(TurnStateValue.READY);
+        TurnDTO turnDTO = objectMapper.readValue(response.getContentAsString(), TurnDTO.class);
+        assertThat(turnDTO.id()).isEqualTo(firstRequestedTurn.getId());
+        assertThat(turnDTO.phoneNumber()).isEqualTo(phoneNumberOne);
+        assertThat(turnDTO.turnNumber().toString()).isEqualTo(firstRequestedTurn.getTurnNumber().toString());
+        assertThat(turnDTO.queueId()).isEqualTo(queueId);
+        assertThat(turnDTO.currentState()).isEqualTo(TurnStateValue.READY);
 
-        Optional<TurnState> optional = turnStateRepository.findLatestStateByTurnId(turn.getId());
+        Optional<TurnState> optional = turnStateRepository.findLatestStateByTurnId(turnDTO.id());
         assertThat(optional).isPresent();
         TurnState turnState = optional.get();
         assertThat(turnState.getState()).isEqualTo(TurnStateValue.READY);
@@ -552,14 +552,14 @@ class TurnControllerTest extends AbstractContainerBaseTest {
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
 
-        Turn turn = objectMapper.readValue(response.getContentAsString(), Turn.class);
-        assertThat(turn.getId()).isEqualTo(readyTurn.getId());
-        assertThat(turn.getPhoneNumber()).isEqualTo(phoneNumberOne);
-        assertThat(turn.getTurnNumber().toString()).isEqualTo(readyTurn.getTurnNumber().toString());
-        assertThat(turn.getQueueId()).isEqualTo(queueId);
-        assertThat(turn.getCurrentState()).isEqualTo(TurnStateValue.STARTED);
+        TurnDTO turnDTO = objectMapper.readValue(response.getContentAsString(), TurnDTO.class);
+        assertThat(turnDTO.id()).isEqualTo(readyTurn.getId());
+        assertThat(turnDTO.phoneNumber()).isEqualTo(phoneNumberOne);
+        assertThat(turnDTO.turnNumber().toString()).isEqualTo(readyTurn.getTurnNumber().toString());
+        assertThat(turnDTO.queueId()).isEqualTo(queueId);
+        assertThat(turnDTO.currentState()).isEqualTo(TurnStateValue.STARTED);
 
-        Optional<TurnState> optional = turnStateRepository.findLatestStateByTurnId(turn.getId());
+        Optional<TurnState> optional = turnStateRepository.findLatestStateByTurnId(turnDTO.id());
         assertThat(optional).isPresent();
         TurnState turnState = optional.get();
         assertThat(turnState.getState()).isEqualTo(TurnStateValue.STARTED);
@@ -620,14 +620,14 @@ class TurnControllerTest extends AbstractContainerBaseTest {
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
 
-        Turn turn = objectMapper.readValue(response.getContentAsString(), Turn.class);
-        assertThat(turn.getId()).isEqualTo(startedTurn.getId());
-        assertThat(turn.getPhoneNumber()).isEqualTo(phoneNumberOne);
-        assertThat(turn.getTurnNumber().toString()).isEqualTo(startedTurn.getTurnNumber().toString());
-        assertThat(turn.getQueueId()).isEqualTo(queueId);
-        assertThat(turn.getCurrentState()).isEqualTo(TurnStateValue.ENDED);
+        TurnDTO turnDTO = objectMapper.readValue(response.getContentAsString(), TurnDTO.class);
+        assertThat(turnDTO.id()).isEqualTo(startedTurn.getId());
+        assertThat(turnDTO.phoneNumber()).isEqualTo(phoneNumberOne);
+        assertThat(turnDTO.turnNumber().toString()).isEqualTo(startedTurn.getTurnNumber().toString());
+        assertThat(turnDTO.queueId()).isEqualTo(queueId);
+        assertThat(turnDTO.currentState()).isEqualTo(TurnStateValue.ENDED);
 
-        Optional<TurnState> optional = turnStateRepository.findLatestStateByTurnId(turn.getId());
+        Optional<TurnState> optional = turnStateRepository.findLatestStateByTurnId(turnDTO.id());
         assertThat(optional).isPresent();
         TurnState turnState = optional.get();
         assertThat(turnState.getState()).isEqualTo(TurnStateValue.ENDED);

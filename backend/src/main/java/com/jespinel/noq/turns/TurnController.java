@@ -22,27 +22,30 @@ public class TurnController {
     }
 
     @PostMapping
-    public ResponseEntity<Turn> create(@RequestBody CreateTurnRequest request) {
+    public ResponseEntity<TurnDTO> create(@RequestBody CreateTurnRequest request) {
         request.validateOrThrow();
         Turn turn = service.create(request.phoneNumber(), request.queueId());
+        TurnDTO turnDTO = TurnDTO.from(turn);
         logger.debug("The turn %s was created in queue %s".formatted(turn.getTurnNumber(), turn.getQueueId()));
-        return ResponseEntity.status(HttpStatus.CREATED).body(turn);
+        return ResponseEntity.status(HttpStatus.CREATED).body(turnDTO);
     }
 
     @DeleteMapping
-    public ResponseEntity<Turn> cancel(@RequestBody CancelTurnRequest request) {
+    public ResponseEntity<TurnDTO> cancel(@RequestBody CancelTurnRequest request) {
         request.validateOrThrow();
         Turn turn = service.cancel(request.phoneNumber());
+        TurnDTO turnDTO = TurnDTO.from(turn);
         logger.debug("The turn %s was cancelled in queue %s".formatted(turn.getTurnNumber(), turn.getQueueId()));
-        return ResponseEntity.status(HttpStatus.OK).body(turn);
+        return ResponseEntity.status(HttpStatus.OK).body(turnDTO);
     }
 
     @PutMapping
-    public ResponseEntity<Turn> callNextTurn(@RequestBody CallNextTurnRequest request) {
+    public ResponseEntity<TurnDTO> callNextTurn(@RequestBody CallNextTurnRequest request) {
         request.validateOrThrow();
         Turn turn = service.callNextTurn(request.queueId());
+        TurnDTO turnDTO = TurnDTO.from(turn);
         logger.debug("The turn %s was called from queue %s".formatted(turn.getTurnNumber(), turn.getQueueId()));
-        return ResponseEntity.status(HttpStatus.OK).body(turn);
+        return ResponseEntity.status(HttpStatus.OK).body(turnDTO);
     }
 
     /**
@@ -53,11 +56,12 @@ public class TurnController {
      * @return Response entity
      */
     @PutMapping("/{turnId}")
-    public ResponseEntity<Turn> update(@PathVariable long turnId, @RequestBody UpdateTurnRequest request) {
+    public ResponseEntity<TurnDTO> update(@PathVariable long turnId, @RequestBody UpdateTurnRequest request) {
         request.validateOrThrow();
         TurnStateValue targetState = TurnStateValue.valueOf(request.targetState());
         Turn turn = service.updateTurn(turnId, targetState);
+        TurnDTO turnDTO = TurnDTO.from(turn);
         logger.debug("The turn %s was moved to state %s".formatted(turn.getTurnNumber(), turn.getCurrentState()));
-        return ResponseEntity.status(HttpStatus.OK).body(turn);
+        return ResponseEntity.status(HttpStatus.OK).body(turnDTO);
     }
 }
