@@ -7,10 +7,12 @@ public record CreateTurnRequest(String phoneNumber, long queueId) {
 
     public void validateOrThrow() {
         if (!PhoneNumbers.isValid(phoneNumber)) {
-            throw new ValidationException("The given phone number is not valid");
+            String message = "The given phone number %s is not valid".formatted(phoneNumber);
+            throw new ValidationException(message);
         }
         if (queueId <= 0) {
-            throw new ValidationException("The given queue id is not valid");
+            String message = "The given queue id %s is not valid".formatted(queueId);
+            throw new ValidationException(message);
         }
     }
 

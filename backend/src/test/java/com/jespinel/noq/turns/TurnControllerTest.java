@@ -56,7 +56,7 @@ class TurnControllerTest extends AbstractContainerBaseTest {
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
         ApiError apiError = objectMapper.readValue(response.getContentAsString(), ApiError.class);
-        assertThat(apiError.error()).isEqualTo("The given phone number is not valid");
+        assertThat(apiError.error()).isEqualTo("The given phone number " + phoneNumberWithErrors + " is not valid");
     }
 
     @Test
