@@ -38,7 +38,7 @@ class QueueControllerTest extends AbstractContainerBaseTest {
     }
 
     @Test
-    void shouldReturn400_WhenRequestIsNotValid() throws Exception {
+    void createQueue_ShouldReturn400_WhenRequestIsNotValid() throws Exception {
         // given
         CreateQueueRequest notValidBranchId = testFactories.getCreateQueueRequest(-1);
 
@@ -55,12 +55,8 @@ class QueueControllerTest extends AbstractContainerBaseTest {
     }
 
     @Test
-    void shouldReturn409_WhenQueueAlreadyExists() throws Exception {
-        Company company = testFactories.getRandomCompany();
-        Company createdCompany = companyService.create(company);
-
-        Branch branch = testFactories.getRandomBranch(createdCompany.getId());
-        Branch createdBranch = branchService.create(branch);
+    void createQueue_ShouldReturn409_WhenQueueAlreadyExists() throws Exception {
+        Branch createdBranch = createQueueAndBranch();
 
         Queue queue = testFactories.getRandomQueue(createdBranch.getId());
         repository.save(queue);
@@ -72,7 +68,9 @@ class QueueControllerTest extends AbstractContainerBaseTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(duplicatedQueueRequest));
         // when
-        MockHttpServletResponse response = mockMvc.perform(request).andReturn().getResponse();
+        MockHttpServletResponse response = mockMvc.perform(request)
+                .andReturn()
+                .getResponse();
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.CONFLICT.value());
         ApiError apiError = objectMapper.readValue(response.getContentAsString(), ApiError.class);
@@ -81,7 +79,7 @@ class QueueControllerTest extends AbstractContainerBaseTest {
     }
 
     @Test
-    void shouldReturn404_WhenParentBranchDoesNotExist() throws Exception {
+    void createQueue_ShouldReturn404_WhenParentBranchDoesNotExist() throws Exception {
         long nonExistentBranchId = 123;
         CreateQueueRequest nonExistentBranchRequest = testFactories.getCreateQueueRequest(nonExistentBranchId);
 
@@ -99,12 +97,8 @@ class QueueControllerTest extends AbstractContainerBaseTest {
     }
 
     @Test
-    void shouldReturn201_WhenGivenAValidRequest() throws Exception {
-        Company company = testFactories.getRandomCompany();
-        Company createdCompany = companyService.create(company);
-
-        Branch branch = testFactories.getRandomBranch(createdCompany.getId());
-        Branch createdBranch = branchService.create(branch);
+    void createQueue_ShouldReturn201_WhenGivenAValidRequest() throws Exception {
+        Branch createdBranch = createQueueAndBranch();
 
         CreateQueueRequest createQueueRequest = testFactories.getCreateQueueRequest(createdBranch.getId());
         LocalDateTime currentDate = LocalDateTime.now();
