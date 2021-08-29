@@ -4,6 +4,7 @@ import com.jespinel.noq.branches.BranchService;
 import com.jespinel.noq.common.exceptions.EntityNotFoundException;
 import com.jespinel.noq.turns.TurnNumberService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -38,5 +39,9 @@ public class QueueService {
             throw new EntityNotFoundException(errorMessage);
         });
         return queue.get();
+    }
+
+    public Page<Queue> getQueues(long branchId, int page) {
+        return repository.findByBranchId(branchId, page);
     }
 }
