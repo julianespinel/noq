@@ -1,5 +1,10 @@
 import React from "react";
 
+import { createCompany } from "../infrastructure/ApiClient";
+
+import { withRouter } from 'react-router-dom';
+import { toast } from 'react-toastify';
+
 class CompanyRegistration extends React.Component {
 
     constructor(props) {
@@ -7,52 +12,63 @@ class CompanyRegistration extends React.Component {
         this.state = {
             tin: "",
             name: "",
-            error: ""
         };
 
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleChange = this.handleChange.bind(this);
     }
 
-    handleSubmit(event) {
-        console.log("handleSubmit");
-        console.log(`tin: ${this.state.tin}`);
-        console.log(`name: ${this.state.name}`);
+    async handleSubmit(event) {
+        event.preventDefault();
+
+        const [error, companyId] = await createCompany(this.state.tin, this.state.name);
+        if (error) {
+            console.error(`Error creating a company: ${error}`);
+            this.setState({ error: error });
+            toast.error(error);
+            return;
+        }
+
+        console.log("The company was created");
+        localStorage.setItem("companyId", companyId);
+        await this.props.history.push("/branches");
     }
 
     handleChange(event) {
-        console.log("handleChange", event.target.id);
         this.setState({
             [event.target.id]: event.target.value
         });
     }
 
     render() {
+        console.log(`company: render: ${this.state.error}`);
         return (
             <main className="form-signin">
-                <form>
-                    <h1 className="h3 mb-3 fw-normal">Company</h1>
+                <form onSubmit={this.handleSubmit}>
+                    <h1 className="h3 mb-3 fw-normal">Add company</h1>
 
                     <div className="form-floating">
-                        <input type="text" className="form-control" id="floatingTin"
-                               placeholder="TIN"/>
-                        <label htmlFor="floatingTin">TIN</label>
+                        <input type="text" className="form-control" id="tin"
+                            value={this.state.tin}
+                            placeholder="TIN" onChange={this.handleChange} autoFocus />
+                        <label htmlFor="tin">TIN</label>
                     </div>
                     <div className="form-floating">
-                        <input type="text" className="form-control" id="floatingName"
-                               placeholder="Name"/>
-                        <label htmlFor="floatingName">Name</label>
+                        <input type="text" className="form-control" id="name"
+                            value={this.state.name}
+                            placeholder="Name" onChange={this.handleChange} />
+                        <label htmlFor="name">Name</label>
                     </div>
 
                     <div className="checkbox mb-3">
                         {/* Leave some space */}
                     </div>
 
-                    <button className="w-100 btn btn-lg btn-primary" type="submit">Create</button>
+                    <button className="w-100 btn btn-lg btn-primary" type="submit">Add</button>
                 </form>
             </main>
         );
     }
 }
 
-export default CompanyRegistration
+export default withRouter(CompanyRegistration);
