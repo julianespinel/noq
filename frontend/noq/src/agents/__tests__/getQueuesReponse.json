@@ -1,0 +1,164 @@
+{
+    "content": [
+        {
+            "id": 1,
+            "name": "Payments",
+            "initialTurn": {
+                "letter": "P",
+                "number": 0
+            },
+            "branchId": 1,
+            "createdAt": [
+                2021,
+                9,
+                2,
+                9,
+                24,
+                15,
+                801509000
+            ],
+            "updatedAt": [
+                2021,
+                9,
+                2,
+                9,
+                24,
+                15,
+                801509000
+            ]
+        },
+        {
+            "id": 2,
+            "name": "Loans",
+            "initialTurn": {
+                "letter": "L",
+                "number": 0
+            },
+            "branchId": 1,
+            "createdAt": [
+                2021,
+                9,
+                2,
+                9,
+                24,
+                15,
+                802321000
+            ],
+            "updatedAt": [
+                2021,
+                9,
+                2,
+                9,
+                24,
+                15,
+                802321000
+            ]
+        },
+        {
+            "id": 23,
+            "name": "Businesses",
+            "initialTurn": {
+                "letter": "B",
+                "number": 0
+            },
+            "branchId": 1,
+            "createdAt": [
+                2021,
+                9,
+                2,
+                9,
+                24,
+                15,
+                803053000
+            ],
+            "updatedAt": [
+                2021,
+                9,
+                2,
+                9,
+                24,
+                15,
+                803053000
+            ]
+        },
+        {
+            "id": 24,
+            "name": "Customer Service",
+            "initialTurn": {
+                "letter": "C",
+                "number": 0
+            },
+            "branchId": 1,
+            "createdAt": [
+                2021,
+                9,
+                2,
+                9,
+                24,
+                15,
+                803867000
+            ],
+            "updatedAt": [
+                2021,
+                9,
+                2,
+                9,
+                24,
+                15,
+                803867000
+            ]
+        },
+        {
+            "id": 25,
+            "name": "ATMs",
+            "initialTurn": {
+                "letter": "A",
+                "number": 0
+            },
+            "branchId": 1,
+            "createdAt": [
+                2021,
+                9,
+                2,
+                9,
+                24,
+                15,
+                804694000
+            ],
+            "updatedAt": [
+                2021,
+                9,
+                2,
+                9,
+                24,
+                15,
+                804694000
+            ]
+        }
+    ],
+    "pageable": {
+        "sort": {
+            "sorted": false,
+            "unsorted": true,
+            "empty": true
+        },
+        "pageSize": 10,
+        "pageNumber": 2,
+        "offset": 20,
+        "paged": true,
+        "unpaged": false
+    },
+    "totalPages": 3,
+    "totalElements": 25,
+    "last": true,
+    "number": 2,
+    "size": 10,
+    "numberOfElements": 5,
+    "sort": {
+        "sorted": false,
+        "unsorted": true,
+        "empty": true
+    },
+    "first": false,
+    "empty": false
+}

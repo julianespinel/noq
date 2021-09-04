@@ -70,10 +70,16 @@ class CallNextTurn extends React.Component {
     render() {
         return (
             <main className="form-signin">
-                <form onSubmit={this.handleSubmit}>
+                <form data-testid="form" onSubmit={this.handleSubmit}>
                     <h1 className="h3 mb-3 fw-normal">Call next turn</h1>
 
-                    <Select options={this.state.queues}
+                    {/*
+                        We need this lable to be able to test the <Select> component.
+                        That's why it is hidden.
+                        See: https://testing-library.com/docs/ecosystem-react-select-event/
+                    */}
+                    <label className="d-none" htmlFor="select">select</label>
+                    <Select inputId="select" name="select" options={this.state.queues}
                         onChange={this.handleChange} />
 
                     <div className="checkbox mb-3">
