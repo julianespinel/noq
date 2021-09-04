@@ -7,7 +7,7 @@ import { getQueuesFromBranch, callNextTurn } from "../infrastructure/ApiClient";
 
 import Select from 'react-select'
 
-class AgentView extends React.Component {
+class CallNextTurn extends React.Component {
 
     constructor(props) {
         super(props);
@@ -80,4 +80,4 @@ class AgentView extends React.Component {
     }
 }
 
-export default withRouter(AgentView);
+export default withRouter(CallNextTurn);
