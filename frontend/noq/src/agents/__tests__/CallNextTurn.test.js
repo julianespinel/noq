@@ -1,9 +1,9 @@
 import React from 'react'
 
-import { Router, MemoryRouter, Switch, Route } from "react-router-dom";
+import { Router } from "react-router-dom";
 import { rest } from 'msw'
 import { setupServer } from 'msw/node'
-import { render, fireEvent, waitFor, screen } from '@testing-library/react'
+import { render, waitFor, screen } from '@testing-library/react'
 import selectEvent from 'react-select-event'
 import '@testing-library/jest-dom'
 import { createMemoryHistory } from 'history'
@@ -15,14 +15,10 @@ import CallNextTurn from '../CallNextTurn'
 // API response fixtures
 import getQueuesResponse from './getQueuesReponse.json'
 import callNextTurnResponse from './callNextTurnResponse.json'
-import App from '../../App';
-import AttendTurn from '../AttendTurn';
 
 const branchId = 1
 const queueId = 1
 const baseUrl = "http://localhost:8000/api";
-
-const callNextTurnRoute = "/agent";
 
 const server = setupServer(
     rest.get(`${baseUrl}/queues`, (req, res, ctx) => {
@@ -61,15 +57,8 @@ test('loads view and shows the queues of the branch', async () => {
     const { getByTestId, } = render(
         <Router history={history}>
             <CallNextTurn />
-            {/* <App /> */}
         </Router>
-        // <MemoryRouter initialEntries={['/agent']}>
-        //     <App />
-        // </MemoryRouter>
     )
-    // localStorage.setItem("branchId", branchId);
-    // localStorage.setItem("role", "agent");
-    // history.push(callNextTurnRoute);
 
     // assert
     expect(screen.getByText(/Call next turn/i)).toBeInTheDocument()
@@ -100,7 +89,4 @@ test('when a queue is selected and an the form is submitted', async () => {
     // assert
     await waitFor(() => expect(history.length).toBe(2));
     await waitFor(() => expect(history.location.pathname).toBe('/agent/turns/A1'));
-    // await waitFor(() => expect(server).toHaveBeenCalledTimes(1))
-    // expect(await screen.findByText(/Attending turn/i)).toBeInTheDocument()
-    // expect(await screen.findByText(/Start/i)).toBeInTheDocument()
 })
