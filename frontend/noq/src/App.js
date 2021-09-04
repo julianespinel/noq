@@ -47,6 +47,10 @@ function App() {
                     <Route path="/logout">
                         <Logout />
                     </Route>
+                    {/* Default path */}
+                    <Route path="/">
+                        <Login />
+                    </Route>
                 </Switch>
             </Router>
             <ToastContainer
