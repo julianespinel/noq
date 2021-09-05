@@ -4,7 +4,6 @@ import { Router } from "react-router-dom";
 import { rest } from 'msw'
 import { setupServer } from 'msw/node'
 import { render, waitFor, screen } from '@testing-library/react'
-import selectEvent from 'react-select-event'
 import '@testing-library/jest-dom'
 import { createMemoryHistory } from 'history'
 import userEvent from '@testing-library/user-event'
