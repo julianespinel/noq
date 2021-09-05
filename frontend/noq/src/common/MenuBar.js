@@ -26,7 +26,7 @@ class MenuBar extends React.Component {
         switch (role) {
             case null:
             case "":
-                return this.getPublicMenu(currentLocation);
+                return this.getPublicMenu();
             case ADMIN:
                 return this.getAdminMenu(currentLocation);
             case MANAGER:
@@ -40,14 +40,8 @@ class MenuBar extends React.Component {
         }
     }
 
-    getPublicMenu(currentLocation) {
-        return (
-            <div className="container-fluid">
-                <ul className="nav nav-pills">
-                    {this.getMenuItem("/login", LOGIN, currentLocation.includes(LOGIN))}
-                </ul>
-            </div>
-        );
+    getPublicMenu() {
+        return (<></>);
     }
 
     getAdminMenu(currentLocation) {
