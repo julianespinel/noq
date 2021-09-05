@@ -1,0 +1,25 @@
+{
+    "id": 1,
+    "phoneNumber": "+573002930001",
+    "queueId": 1,
+    "turnNumber": "A1",
+    "currentState": "STARTED",
+    "createdAt": [
+        2021,
+        9,
+        4,
+        20,
+        58,
+        45,
+        545654000
+    ],
+    "updatedAt": [
+        2021,
+        9,
+        4,
+        20,
+        58,
+        45,
+        545654000
+    ]
+}

@@ -1,0 +1,25 @@
+{
+    "id": 1,
+    "phoneNumber": "+573002930008",
+    "queueId": 1,
+    "turnNumber": "A1",
+    "currentState": "CANCELLED",
+    "createdAt": [
+        2021,
+        9,
+        5,
+        8,
+        10,
+        53,
+        28662000
+    ],
+    "updatedAt": [
+        2021,
+        9,
+        5,
+        8,
+        10,
+        53,
+        28662000
+    ]
+}

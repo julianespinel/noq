@@ -1,0 +1,27 @@
+{
+    "id": 1,
+    "name": "Queue X",
+    "initialTurn": {
+        "letter": "X",
+        "number": 1
+    },
+    "branchId": 1,
+    "createdAt": [
+        2021,
+        9,
+        5,
+        8,
+        1,
+        27,
+        966237271
+    ],
+    "updatedAt": [
+        2021,
+        9,
+        5,
+        8,
+        1,
+        27,
+        966237271
+    ]
+}
