@@ -34,7 +34,7 @@ That's why I decided to create this piece of software.
 
 Noq is divided in two main parts:
 
-* [Frontend](frontend/): Responsive web UI made with React.
+* [Frontend](frontend/noq/): Responsive web UI made with React.
 * [Backend](backend/): API made using Spring Boot, Postgres and Redis.
 
 You can find the documentation of each of them clicking the links above ^.
