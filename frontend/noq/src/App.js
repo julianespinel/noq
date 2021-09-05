@@ -48,7 +48,7 @@ function App() {
                         <Logout />
                     </Route>
                     {/* Default path */}
-                    <Route path="/">
+                    <Route>
                         <Login />
                     </Route>
                 </Switch>

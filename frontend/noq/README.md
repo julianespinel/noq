@@ -1,70 +1,169 @@
-# Getting Started with Create React App
+# Noq Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+- [Noq Frontend](#noq-frontend)
+  - [Views](#views)
+  - [Public views](#public-views)
+    - [Login](#login)
+  - [Admin views](#admin-views)
+    - [Create company](#create-company)
+    - [Create branch](#create-branch)
+    - [Create queue](#create-queue)
+  - [Manager views](#manager-views)
+    - [Create branch](#create-branch-1)
+    - [Create queue](#create-queue-1)
+    - [Call next turn](#call-next-turn)
+    - [Start turn](#start-turn)
+    - [End turn](#end-turn)
+  - [Agent views](#agent-views)
+    - [Call next turn](#call-next-turn-1)
+    - [Start turn](#start-turn-1)
+    - [End turn](#end-turn-1)
+  - [Customer views](#customer-views)
+    - [Request turn](#request-turn)
+    - [Turn confirmation](#turn-confirmation)
+  - [Tests](#tests)
+  - [Run](#run)
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+This directory contains the frontend code of Noq.
 
-### `npm start`
+The frontend is a React application that consumes the backend API via HTTP and uses:
+1. React router: to handle transitions between views.
+2. Testing-library: for tests.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+![Architecture](../../backend/docs/diagrams/architecture.jpg)
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## Views
 
-### `npm test`
+The frontend shows different views depending on the role of an authenticated user.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Public views
 
-### `npm run build`
+### Login
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+![Login](docs/1-login.png)
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+---
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Admin views
 
-### `npm run eject`
+The administrator of the system can:
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+1. Create a company
+2. Create a branch in a company
+3. Create a queue in a branch
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Create company
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+![Create company](docs/2-admin-home.png)
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+### Create branch
 
-## Learn More
+![Create branch](docs/3-create-branch.png)
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### Create queue
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+![Create queue](docs/4-create-queue.png)
 
-### Code Splitting
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## Manager views
 
-### Analyzing the Bundle Size
+The manager of the company can:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+1. Create a branch in a company
+2. Create a queue in a branch
+3. Call the next turn
+4. Mark a turn as started
+5. Mark a turn as ended
 
-### Making a Progressive Web App
+### Create branch
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+![Create branch](docs/5-manager-home.png)
 
-### Advanced Configuration
+### Create queue
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+![Create queue](docs/6-create-queue.png)
 
-### Deployment
+### Call next turn
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+![Call next turn](docs/7-call-next-turn.png)
 
-### `npm run build` fails to minify
+### Start turn
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Mark the current turn as started, meaning that we are attending the customer.
+
+![Attend turn](docs/9-attending-turn.png)
+
+### End turn
+
+Mark the current turn as ended, meaning that we are done attending the customer.
+
+![End turn](docs/10-started-atteding-turn.png)
+
+---
+
+## Agent views
+
+An agent is associated to a single branch and can do the following:
+
+1. Call the next turn
+2. Mark a turn as started
+3. Mark a turn as ended
+
+### Call next turn
+
+![Call next turn](docs/8-agent-home.png)
+
+### Start turn
+
+Mark the current turn as started, meaning that we are attending the customer.
+
+![Attend turn](docs/9-attending-turn.png)
+
+### End turn
+
+Mark the current turn as ended, meaning that we are done attending the customer.
+
+![End turn](docs/10-started-atteding-turn.png)
+
+---
+
+## Customer views
+
+A customer of a branch can:
+
+1. Request a new turn
+2. See the confirmation that a new turn was generated
+
+**How do we know to which branch the user is requesting a new turn?**
+
+Each branch should have a user with the role "customer".
+Before the branch opens, an employee of the branch must authenticate (using the
+credentials of the user with role "customer") in the device(s) that will be
+used by the customers.
+
+### Request turn
+
+![Request turn](docs/11-customer-home.png)
+
+### Turn confirmation
+
+![Request turn](docs/12-turn-confirmation.png)
+
+## Tests
+
+In order to execute the frontend tests please do the following:
+
+1. Clone the repository
+2. `cd frontend/noq/`
+3. `npm test`
+
+## Run
+
+In order to run the frontend, please do the following:
+
+1. Clone the repository
+2. `cd frontend/noq/`
+3. `npm start`
