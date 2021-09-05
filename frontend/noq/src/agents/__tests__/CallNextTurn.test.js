@@ -9,11 +9,11 @@ import '@testing-library/jest-dom'
 import { createMemoryHistory } from 'history'
 import userEvent from '@testing-library/user-event'
 
-
 import CallNextTurn from '../CallNextTurn'
 
+
 // API response fixtures
-import getQueuesResponse from './getQueuesReponse.json'
+import getQueuesResponse from './getQueuesResponse.json'
 import callNextTurnResponse from './callNextTurnResponse.json'
 
 const branchId = 1
