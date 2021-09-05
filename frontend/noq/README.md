@@ -70,11 +70,13 @@ The administrator of the system can:
 
 ## Manager views
 
-The manager of the company:
+The manager of the company can:
 
 1. Create a branch in a company
 2. Create a queue in a branch
 3. Call the next turn
+4. Mark a turn as started
+5. Mark a turn as ended
 
 ### Create branch
 
