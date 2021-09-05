@@ -10,6 +10,7 @@ class AttendTurn extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            turn: props.location.state.turn,
             hasStarted: false,
         }
 
@@ -20,8 +21,8 @@ class AttendTurn extends React.Component {
     async handleStart(event) {
         event.preventDefault();
 
-        const turn = this.props.location.state.turn;
-        const [error, ] = await startTurn(turn.id);
+        const turn = this.state.turn;
+        const [error,] = await startTurn(turn.id);
 
         if (error) {
             console.error(`Error starting turn ${turn.turnNumber}: ${error}`);
@@ -38,8 +39,8 @@ class AttendTurn extends React.Component {
     async handleEnd(event) {
         event.preventDefault();
 
-        const turn = this.props.location.state.turn;
-        const [error, ] = await endTurn(turn.id);
+        const turn = this.state.turn;
+        const [error,] = await endTurn(turn.id);
 
         if (error) {
             console.error(`Error ending turn ${turn.turnNumber}: ${error}`);
@@ -52,14 +53,15 @@ class AttendTurn extends React.Component {
     }
 
     render() {
+        const turn = this.state.turn;
         const showStart = this.state.hasStarted ? "d-none" : "";
         const showEnd = this.state.hasStarted ? "" : "d-none";
         return (
             <main className="form-signin">
-                <h1 className="h3 mb-3 fw-normal">Attending turn {this.props.match.params.turnNumber}</h1>
+                <h1 className="h3 mb-3 fw-normal">Attending turn {turn.turnNumber}</h1>
                 <button className={`w-100 btn btn-lg btn-primary mt-5 ${showStart}`}
                     onClick={this.handleStart} type="submit">Start</button>
-            <button className={`w-100 btn btn-lg btn-primary mt-5 ${showEnd}`}
+                <button className={`w-100 btn btn-lg btn-primary mt-5 ${showEnd}`}
                     onClick={this.handleEnd} type="submit">End</button>
             </main>
         );

@@ -42,6 +42,7 @@ afterAll(() => server.close())
 test('on first render, it shows the current turn and start button is visible', async () => {
     // arrange
     const history = createMemoryHistory()
+    history.push(`agent/turns/${turn.turnNumber}`, { turn })
 
     // act
     render(
@@ -87,7 +88,7 @@ test('when the start button is clicked it should get hidden and show the end but
 test('when the end button is clicked it should redirect to /agent', async () => {
     // arrange
     const history = createMemoryHistory();
-    history.push(`agent/turns/${turn.turnNumber}`, { turn })
+    history.push(`agent/turns/${turn.turnNumber}`, { turn });
     render(
         <Router history={history}>
             <AttendTurn />
