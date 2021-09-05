@@ -77,23 +77,28 @@ class TurnRequest extends React.Component {
         }
 
         const turnNumber = turn.turnNumber;
-        this.props.history.push(`/turns/${turnNumber}/confirmation`, { turnNumber });
+        await this.props.history.push(`/turns/${turnNumber}/confirmation`, { turnNumber });
     }
 
     render() {
         return (
             <main className="form-signin">
-                <form onSubmit={this.handleSubmit}>
+                <form data-testid="form" onSubmit={this.handleSubmit}>
                     <h1 className="h3 mb-3 fw-normal">Request turn</h1>
 
-                    <Select id="selectedQueue" options={this.state.queues}
+                    {/*
+                        We need this lable to be able to test the <Select> component.
+                        That's why it is hidden.
+                        See: https://testing-library.com/docs/ecosystem-react-select-event/
+                    */}
+                    <label className="d-none" htmlFor="select">select</label>
+                    <Select inputId="select" name="select" options={this.state.queues}
                         onChange={this.handleSelect} />
 
                     <div className="form-floating">
                         <input type="tel" className="form-control" id="phoneNumber"
-                            onChange={this.handleChange}
-                            placeholder="Phone number" />
-                        <label htmlFor="floatingPhone">Phone number</label>
+                            onChange={this.handleChange} placeholder="Phone number" />
+                        <label htmlFor="phoneNumber">Phone number</label>
                     </div>
 
                     <div className="checkbox mb-3">
