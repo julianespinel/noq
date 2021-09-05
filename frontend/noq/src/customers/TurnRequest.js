@@ -1,10 +1,11 @@
 import React from "react";
 
-import { withRouter } from 'react-router-dom';
-import { getQueuesFromBranch, requestTurn } from "../infrastructure/ApiClient";
 import { toast } from 'react-toastify';
 
-import Select from 'react-select'
+import { withRouter } from 'react-router-dom';
+import { getQueuesFromBranch, requestTurn } from "../infrastructure/ApiClient";
+
+import Select from 'react-select';
 
 class TurnRequest extends React.Component {
 
@@ -22,6 +23,8 @@ class TurnRequest extends React.Component {
     }
 
     async componentDidMount() {
+        this._isMounted = true;
+
         const branchId = localStorage.getItem("branchId");
         const [error, page] = await getQueuesFromBranch(branchId, this.state.queuesPage);
         if (error) {
@@ -33,7 +36,13 @@ class TurnRequest extends React.Component {
 
         const list = page.content;
         const queues = list.map(queue => ({ value: queue.id, label: queue.name }));
-        this.setState({ queues: queues });
+        if (this._isMounted) {
+            this.setState({ queues: queues });
+        }
+    }
+
+    componentWillUnmount() {
+        this._isMounted = false;
     }
 
     handleSelect(selectedQueue) {
