@@ -16,7 +16,7 @@ const baseUrl = "http://localhost:8000/api";
  * @returns an object containing at least the following keys:
  *          role, companyId, branchId
  */
-function login(username, password) {
+async function login(username, password) {
     // TODO: perform login request
     return {
         role: "admin",

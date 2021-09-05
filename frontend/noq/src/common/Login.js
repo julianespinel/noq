@@ -18,7 +18,7 @@ class Login extends React.Component {
         this.handleChange = this.handleChange.bind(this);
     }
 
-    handleSubmit(event) {
+    async handleSubmit(event) {
         event.preventDefault();
         // Why event.preventDefault()? : https://www.robinwieruch.de/react-preventdefault
 
@@ -40,7 +40,7 @@ class Login extends React.Component {
          */
 
         try {
-            const response = login(this.state.username, this.state.password);
+            const response = await login(this.state.username, this.state.password);
             const role = response.role
             localStorage.setItem("role", role);
             localStorage.setItem("companyId", response.companyId);
@@ -48,7 +48,7 @@ class Login extends React.Component {
 
             const nextTab = nextTabs[role];
             if (nextTab) {
-                this.props.history.push(`/${nextTab}`);
+                await this.props.history.push(`/${nextTab}`);
                 return;
             }
         } catch (error) {
