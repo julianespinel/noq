@@ -1,68 +1,70 @@
-# Noq
+# Noq Backend
 
-Let your phone make the queue for you.
+- [Noq Backend](#noq-backend)
+  - [Entities](#entities)
+  - [Features](#features)
+    - [Company](#company)
+    - [Branch](#branch)
+    - [Queue](#queue)
+    - [Turn](#turn)
+      - [Turn states](#turn-states)
+  - [API](#api)
+  - [Tests](#tests)
+  - [Run](#run)
 
-## Description
+---
 
-Imagine the following scenario:
+This directory contains the backend code of Noq.
 
-You are in a mall and want to go to your bank's branch that is located in that mall. Instead of making a line and stand
-still until you are attended by the bank clerk, you type your phone number into a tablet by the entrance of the branch
-and then leave.
+The backend is a Spring Boot application that exposes an API via HTTP and uses:
+1. Postgres: to persist data.
+2. Redis:
+   1. To cache current turns.
+   2. To generate turn sequences in a distributed environment.
+      <br>See: https://redis.io/commands/INCR
 
-Now you are able to walk around and even buy a few things while you "wait"
-for a text message. Twenty minutes have passed since you left the branch, when you get a text message telling you to
-please go back to the bank because you are the next turn.
+![Architecture](./docs/diagrams/architecture.jpg)
 
-Five minutes later, you arrive at the bank's branch, and your number gets called almost immediately.
+## Entities
 
-## Why?
+The code is divided by entities, here are the main entities of the problem.
 
-During the Covid19 pandemic I was living in a country in Latin America. One day I had to go to a branch of one of the
-biggest banks in that country. The branch was located in a nice mall in the city.
-
-I arrived 10 minutes before the branch opened to avoid a large queue. Unfortunately I was not the only one who thought
-about doing that, and ended up having to make a line both outside and inside the branch.
-
-As you can imagine this was very risky because of Covid19. However, that was not the only reason. Standing still in a line is
-both boring and not time efficient. That's why I decided to create this piece of software.
-
-## Spec
-
-### Entities
-
-Noq has 5 main entities:
-
-1. Company: has many branches
-1. Branch: has many queues
-1. Queue: has many turns
-1. Turn: represents a customer in a queue
-1. TurnState: represents a state of a turn
+1. Company
+   * A company has many branches.
+   * Example: a bank.
+2. Branch
+   * A branch has many queues.
+   * Example: the bank branch located on 33th St.
+3. Queue
+   * A queue has many turns.
+   * Example: the payments queue in a bank branch.
+4. Turn
+   * A turn represents a customer in a queue.
+   * Example: the turn P1 is the first turn of the payments queue.
+5. TurnState
+   * A turn state represents a state of a turn.
+   * For example the current state of turn P1 is "requested".
 
 ![Domain](docs/diagrams/domain.jpg)
 
-### API
+## Features
 
-You can find the full API spec [here](docs/api_spec.json) in Open API format.
+These are the functionalities the system provides grouped by entity:
 
-Additionally, when you start the system you can interact with the API documentation
-using Swagger UI here: http://locahost:8000/swagger-ui.html
-
-The system provides an API that you can use to:
-
-#### Company
+### Company
 
 1. Create a company
 
-#### Branch
+### Branch
 
 1. Create a branch of a company
+2. Get the queues of a branch
 
-#### Queue
+### Queue
 
 1. Create a queue in a branch
 
-#### Turn
+### Turn
 
 1. Request a turn in a queue given a phone number
 1. Call the next turn in a queue
@@ -70,6 +72,34 @@ The system provides an API that you can use to:
 1. Mark turn as started
 1. Mark turn as ended
 
+#### Turn states
+
 The five Turn endpoints of the Turn entity are used to move the turn in the following state machine:
 
 ![State Machine](docs/diagrams/state-machine.jpg)
+
+## API
+
+You can find the full API spec [here](docs/api_spec.json) in Open API format.
+
+Additionally, when you [run the system](#run) you can interact with the API
+documentation using Swagger UI here: http://localhost:8000/swagger-ui.html
+
+
+## Tests
+
+In order to execute the tests of the backend please do the following:
+
+1. Clone the repository
+2. `cd noq/backend/`
+3. `mvn clean test`
+
+## Run
+
+In order to run the backend, please do the following:
+
+1. Clone the repository
+2. `cd noq/backend/`
+3. `docker-compose up -d`
+4. `mvn clean package`
+5. `java -jar target/noq-0.0.1-SNAPSHOT.jar`
