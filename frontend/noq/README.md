@@ -40,6 +40,8 @@ The frontend shows different views depending on the role of an authenticated use
 
 ## Public views
 
+The only public view is the login.
+
 ### Login
 
 ![Login](docs/1-login.png)
