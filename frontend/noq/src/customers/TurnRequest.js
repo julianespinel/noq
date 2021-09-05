@@ -60,6 +60,13 @@ class TurnRequest extends React.Component {
     async handleSubmit(event) {
         event.preventDefault();
 
+        if (!this.state.selectedQueue) {
+            const selectorError = "Please select a queue";
+            this.setState({ error: selectorError });
+            toast.error(selectorError);
+            return;
+        }
+
         const queueId = this.state.selectedQueue.value;
         const [error, turn] = await requestTurn(this.state.phoneNumber, queueId);
         if (error) {
