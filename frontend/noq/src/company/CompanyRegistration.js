@@ -41,7 +41,6 @@ class CompanyRegistration extends React.Component {
     }
 
     render() {
-        console.log(`company: render: ${this.state.error}`);
         return (
             <main className="form-signin">
                 <form onSubmit={this.handleSubmit}>

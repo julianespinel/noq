@@ -13,8 +13,6 @@ import BranchRegistration from '../BranchRegistration';
 import createBranchResponse from './createBranchResponse.json'
 
 
-const branchId = 1
-const turnId = 1
 const baseUrl = "http://localhost:8000/api";
 
 const server = setupServer(
@@ -26,11 +24,7 @@ const server = setupServer(
     }),
 )
 
-beforeAll(() => {
-    server.listen();
-    localStorage.setItem("branchId", branchId);
-    localStorage.setItem("role", "agent");
-})
+beforeAll(() => server.listen())
 
 afterEach(() => server.resetHandlers())
 
