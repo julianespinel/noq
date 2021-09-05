@@ -42,14 +42,13 @@ const server = setupServer(
 beforeAll(() => {
     server.listen();
     localStorage.setItem("branchId", branchId);
-    localStorage.setItem("role", "agent");
 })
 
 afterEach(() => server.resetHandlers())
 
 afterAll(() => server.close())
 
-test('loads view and shows the queues of the branch', async () => {
+test('when the view is rendered it shows the queues of the branch', async () => {
     // arrange
     const history = createMemoryHistory()
 
@@ -68,7 +67,7 @@ test('loads view and shows the queues of the branch', async () => {
     expect(getByTestId('form')).toHaveFormValues({ select: '1' })
 })
 
-test('when a queue is selected and an the form is submitted', async () => {
+test('when the form is submitted it should transition to attend turn', async () => {
     // arrange
     const history = createMemoryHistory();
     const { getByTestId, } = render(
