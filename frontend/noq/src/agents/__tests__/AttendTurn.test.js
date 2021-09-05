@@ -12,6 +12,7 @@ import userEvent from '@testing-library/user-event'
 // API response fixtures
 import turn from './callNextTurnResponse.json'
 import startTurnResponse from './startTurnResponse.json'
+import endTurnResponse from './endTurnResponse.json'
 import AttendTurn from '../AttendTurn';
 
 
@@ -110,9 +111,21 @@ test('when the end button is clicked it should redirect to /agent', async () => 
     // act
     let endButton = screen.getByText('End');
     expect(endButton).toBeInTheDocument();
+    overrideServerHandlerToMatchEndTurnRequest();
     userEvent.click(endButton);
 
     // assert
     await waitFor(() => expect(history.length).toBe(2));
     await waitFor(() => expect(history.location.pathname).toBe('/agent'));
 })
+
+function overrideServerHandlerToMatchEndTurnRequest() {
+    server.use(
+        rest.put(`${baseUrl}/turns/${turnId}`, (req, res, ctx) => {
+            return res(
+                ctx.status(200),
+                ctx.json(endTurnResponse)
+            );
+        })
+    );
+}
