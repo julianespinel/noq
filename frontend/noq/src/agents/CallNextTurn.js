@@ -5,7 +5,7 @@ import { toast } from 'react-toastify';
 import { withRouter } from 'react-router-dom';
 import { getQueuesFromBranch, callNextTurn } from "../infrastructure/ApiClient";
 
-import Select from 'react-select'
+import Select from 'react-select';
 
 class CallNextTurn extends React.Component {
 
@@ -22,6 +22,8 @@ class CallNextTurn extends React.Component {
     }
 
     async componentDidMount() {
+        this._isMounted = true;
+
         const branchId = localStorage.getItem("branchId");
         const [error, page] = await getQueuesFromBranch(branchId, this.state.queuesPage);
         if (error) {
@@ -33,7 +35,14 @@ class CallNextTurn extends React.Component {
 
         const list = page.content;
         const queues = list.map(queue => ({ value: queue.id, label: queue.name }));
-        this.setState({ queues: queues });
+
+        if (this._isMounted) {
+            this.setState({ queues: queues });
+        }
+    }
+
+    componentWillUnmount() {
+        this._isMounted = false;
     }
 
     handleChange(selectedQueue) {
