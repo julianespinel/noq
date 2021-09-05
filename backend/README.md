@@ -83,7 +83,7 @@ The five Turn endpoints of the Turn entity are used to move the turn in the foll
 You can find the full API spec [here](docs/api_spec.json) in Open API format.
 
 Additionally, when you [run the system](#run) you can interact with the API
-documentation using Swagger UI here: http://localhost:8000/swagger-ui.html
+documentation using Swagger UI [here](http://localhost:8000/swagger-ui.html).
 
 
 ## Tests
