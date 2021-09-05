@@ -48,7 +48,7 @@ class AttendTurn extends React.Component {
             return;
         }
 
-        await this.props.history.push(`/agent/`);
+        await this.props.history.push(`/agent`);
     }
 
     render() {
