@@ -19,7 +19,7 @@ turn.
 Five minutes later, you arrive at the bank's branch, and your number gets called
 almost immediately.
 
-## Why?
+## Motivation
 
 During the Covid19 pandemic I was living in a country in Latin America. One day
 I had to go to a branch of one of the biggest banks in that country. The branch
