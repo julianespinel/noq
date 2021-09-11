@@ -29,7 +29,9 @@ public class TwilioSmsNotifier implements ISmsNotifier {
     @Override
     public void send(String phoneNumber, String message) {
         PhoneNumber to = new PhoneNumber(phoneNumber);
-        Message sentMessage = Message.creator(to, sender, message).create();
+        Message sentMessage = Message
+                .creator(to, sender, message)
+                .create();
         logger.debug("TWILIO: Message sent to %s, message sid %s".
                 formatted(phoneNumber, sentMessage.getSid()));
     }
