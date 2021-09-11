@@ -15,18 +15,13 @@ import org.springframework.stereotype.Service;
 )
 public class TwilioSmsNotifier implements ISmsNotifier {
 
-    @Value("${twilio.account.sid}")
-    private String sid;
-
-    @Value("${twilio.account.token}")
-    private String token;
-
-    @Value("${twilio.sender.number}")
-    private String senderNumber;
-
     private final PhoneNumber sender;
 
-    public TwilioSmsNotifier() {
+    public TwilioSmsNotifier(
+            @Value("${twilio.account.sid}") String sid,
+            @Value("${twilio.account.token}") String token,
+            @Value("${twilio.sender.number}") String senderNumber
+    ) {
         Twilio.init(sid, token);
         sender = new PhoneNumber(senderNumber);
     }
