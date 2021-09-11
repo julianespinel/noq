@@ -15,7 +15,8 @@ public class NotificationService {
     }
 
     public void notifyTurnCreation(Turn turn) {
-        String turnRequestedTemplate = "Your turn has been requested, you got turn %s";
+        String turnRequestedTemplate =
+                "Your turn has been requested, you got turn %s. If you want to cancel, please text 9";
         String message = turnRequestedTemplate.formatted(turn.getTurnNumber());
         smsNotifier.send(turn.getPhoneNumber(), message);
     }
