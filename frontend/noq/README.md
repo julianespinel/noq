@@ -154,13 +154,18 @@ used by the customers.
 
 ![Request turn](docs/12-turn-confirmation.png)
 
+## Install
+
+1. Clone the repository
+2. `cd frontend/noq/`
+3. `npm install`
+
 ## Tests
 
 In order to execute the frontend tests please do the following:
 
-1. Clone the repository
-2. `cd frontend/noq/`
-3. `npm test`
+1. `cd frontend/noq/`
+2. `npm test`
 
 ## Run
 
